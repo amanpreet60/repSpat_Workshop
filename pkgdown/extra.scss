@@ -43,6 +43,20 @@ html {
   max-width: none;
 }
 
+// Phone layout: Bootstrap's page gutter is `--bs-gutter-x: 1.5rem`, which the
+// 10px root font size above shrank from 24px to 15px — so body text sat only
+// ~8px from each screen edge and read as having no margin at all.
+//
+// Overriding the variable (rather than .container's padding directly) is what
+// makes this work: the same variable drives the container padding, the .row
+// negative margins, and the column padding. Setting padding alone would just
+// be cancelled out by the row's negative margin.
+@media (max-width: 767.98px) {
+  .container {
+    --bs-gutter-x: 40px;
+  }
+}
+
 // Scoped to md+ since below that the columns stack and pkgdown gives the TOC
 // its own full-width treatment, where a left indent would just look off.
 // Give the TOC/links column a fixed width and let main absorb whatever is

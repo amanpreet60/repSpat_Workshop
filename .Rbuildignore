@@ -1,6 +1,13 @@
-^LICENSE\.md$
-.github
+
 Dockerfile
 _pkgdown.yml
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^\.DS_Store$
+^\.venv$
+^inst/images$
+^inst/extdata/.*\.h5ad$
+^vignettes/HOWTO_BUILD_WORKSHOP\.Rmd$
+^docs$
+^build_site\.R$
+

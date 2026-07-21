@@ -1,52 +1,126 @@
-# BuildABiocWorkshop
+# repSpat
 
-This package is a template for building a Bioconductor workshop. The package
-includes Github actions to:
+A Python package for detecting repeated spatial patterns in spatial omics data, defined as tissue regions that 
+are spatially separated but share similar underlying cell-type or biological profile distributions. 
+The package provides a nonparametric statistical inference framework that integrates spatially constrained 
+clustering followed by spatial invariance testing between clusters using a block-permutation procedure based on 
+the maximum mean discrepancy (MMD) statistic. This enables formal hypothesis testing for repeated spatial patterns. 
+It also works natively with AnnData .h5ad files, the standard format for single-cell and spatial omics workflows, 
+making it suitable for exploration and analysis of spatial omics datasets.
 
-1. Set up bioconductor/bioconductor_docker:devel on Github resources
-2. Install package dependencies for your package (based on the `DESCRIPTION` file)
-3. Run `rcmdcheck::rcmdcheck`
-4. Build a pkgdown website and push it to github pages
-5. Build a docker image with the installed package and dependencies and deploy to [the Github Container Repository](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#pulling-container-images) at the name `ghcr.io/gihub_user/repo_name`, all lowercase. 
+`repSpat` is currently available in GitHub as a python package.
+In this workshop we will be demonstrating functionalities of repspat in R using reticulate.
 
-## Responsibilities
-
-Package authors are primarily responsible for:
-
-1. Creating a landing site of their choosing for their workshops (a website). This website should be listed in the `DESCRIPTION` file as the `URL`.
-2. Creating a docker image that will contain workshop materials and the installed packages necessary to run those materials. The name of the resulting docker image, including "tag" if desired, should be listed in a non-standard tag, `DockerImage:` in the `DESCRIPTION` file. 
-
-Both of those tasks can be accomplished using the Github actions included in this template package. The vignette accompanying this package describes how to accomplish both of these tasks.
-
-## Details
-
-For detailed instructions, see the `How to build a workshop` article/vignette.
-
-## Results of successful deployment
-
-- A working docker image that contains the installed package and dependencies.
-- An up-to-date `pkgdown` website at https://YOURUSERNAME.github.io/YOURREPOSITORYNAME/
-- Docker image will be tagged with `latest`, `sha-XXXXXX` where `XXXXXX` is the hash of the current `master` commit, and `master`. 
-
-## To use the resulting image:
-
-```sh
-docker run -e PASSWORD=<choose_a_password_for_rstudio> -p 8787:8787 YOURDOCKERIMAGENAME
-```
-Once running, navigate to http://localhost:8787/ and then login with `rstudio`:`yourchosenpassword`. 
-
-To try with **this** repository docker image:
-
-```sh
-docker run -e PASSWORD=abc -p 8787:8787 ghcr.io/bioconductor/buildabiocworkshop
+```r
+library(reticulate)
+reticulate::py_install("git+https://github.com/amanpreet60/repspat.git")
+repspat <- import("repspat", convert = FALSE)
 ```
 
-*NOTE*: Running docker that uses the password in plain text like above exposes the password to others 
-in a multi-user system (like a shared workstation or compute node). In practice, consider using an environment 
-variable instead of plain text to pass along passwords and other secrets in docker command lines. 
+## Workshop Goals
 
+By the end of this workshop, participants will be able to:
 
-## Whatcha get
+- Understand the goal of repeated spatial pattern detection.
+- Apply constrained agglomerative hierarchical clustering (CAHC) to obtain spatially contiguous clusters.
+- Perform pairwise comparisons of cluster distributions using the maximum mean discrepancy squared (MMD2) statistic.
+- Approximate the null distribution of the MMD2 statistic using block permutation while preserving local dependence.
+- Reassign cluster labels based on pairwise similarity.
+- Interpret repeated spatial patterns and try the workflow with different data types.
 
-- https://bioconductor.github.io/BuildABiocWorkshop
-- A Docker image that you can run locally, in the cloud, or (usually) even as a singularity container on HPC systems. 
+## Workshop Length
+
+90 minutes.
+
+## Prerequisites
+
+Participants should have:
+
+- Basic familiarity with R.
+- Familiarity with spatial omics data eg. Visium, MIBI-TOF.
+- Basic experience working with spatial experiment package.
+
+## Docker
+
+This repository includes a Docker image for reproducing the workshop workflow.
+
+Follow these steps to run the workshop locally:
+
+1. Open a terminal and go to the working directory where you want to run the workshop.
+
+```terminal
+cd /path/to/your/working/directory
+```
+
+2. Pull the workshop Docker image.
+
+```text
+docker pull ghcr.io/amanpreet60/repspatworkshop:latest
+```
+
+3. Start the Docker container.
+
+```terminal
+docker run \
+  -p 8787:8787 \
+  -e PASSWORD=bioc \
+  ghcr.io/amanpreet60/repspatworkshop:latest
+```
+
+4. Open RStudio in your browser.
+
+```text
+http://localhost:8787
+```
+
+5. Log in with the following credentials.
+
+```text
+username: rstudio
+password: bioc
+```
+
+## Required R Packages
+
+```r
+install.packages(c("reticulate"))
+
+BiocManager::install(c(
+    "BiocStyle",
+    "SpatialExperiment",
+    "SingleCellExperiment",
+    "SummarizedExperiment"
+))
+```
+
+## Vignettes
+
+MIBI-TOF spatial proteomics TNBC (Triple-Negative Breast Cancer)
+
+```text
+vignettes/tnbc_example.Rmd
+```
+
+MIBI-TOF spatial proteomics TNBC with threshold markers
+
+```text
+vignettes/tnbc_example_binary.Rmd
+```
+
+10x Visium spatial transcriptomics of mouse brain
+
+```text
+vignettes/mouse_example.Rmd
+```
+
+## References
+
+1. Senanayake, R. & Jeganathan, P. (2025). A Robust Nonparametric Framework for Detecting Repeated Spatial Patterns. arXiv:2506.14103. https://arxiv.org/html/2506.14103
+
+2. González-Almagro, G., Peralta, D., De Poorter, E., Cano, J.-R., & García, S. (2023). Semi-Supervised Constrained Clustering: An In-Depth Overview, Ranked Taxonomy and Future Research Directions. arXiv:2303.00522. https://arxiv.org/abs/2303.00522
+
+3. Keren, L., Bosse, M., Marquez, D., et al. (2018). A Structured Tumor-Immune Microenvironment in Triple Negative Breast Cancer (TNBC) Revealed by Multiplexed Ion Beam Imaging. *Cell*, 174(6), 1373-1387. https://www.cell.com/fulltext/S0092-8674(18)31100-0
+
+4. 10x Genomics. Visium spatial gene expression, mouse coronal brain section. Distributed via the Bioconductor `STexampleData` package. https://bioconductor.org/packages/STexampleData
+
+5. Virshup, I., Rybakov, S., Theis, F. J., Angerer, P., & Wolf, F. A. (2024). anndata: Access and store annotated data matrices. *Journal of Open Source Software*, 9(101), 4371. https://doi.org/10.21105/joss.04371

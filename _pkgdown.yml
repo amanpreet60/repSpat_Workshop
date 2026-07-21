@@ -1,18 +1,66 @@
-url: https://seandavi.github.io/BuildABiocWorkshop
+url: https://amanpreet60.github.io/repSpat_Workshop/
 
 template:
+  bootstrap: 5
   params:
-    bootswatch: flatly
+    bootswatch: lux
     #ganalytics: UA-99999999-9
 
 home:
-  title: "BuildABiocWorkshop"
+  title: "repSpatWorkshop"
   type: inverse
+  sidebar:
+    structure: [links, license, citation, developers]
+    components:
+      developers:
+        title: Developers
+        text: |
+          <ul class="list-unstyled">
+            <li class="mb-3">
+              <div><a href="https://amanpreet60.github.io/" target="_blank" rel="noopener">Amanpreet Singh</a></div>
+              <a href="https://github.com/amanpreet60" target="_blank" rel="noopener" aria-label="Amanpreet Singh on GitHub" class="me-2"><i class="fab fa-github fa-lg"></i></a>
+              <a href="https://www.linkedin.com/in/amanpreetsingh2212/" target="_blank" rel="noopener" aria-label="Amanpreet Singh on LinkedIn" class="me-2"><i class="fab fa-linkedin fa-lg"></i></a>
+              <a href="mailto:singa429@mcmaster.ca" aria-label="Email Amanpreet Singh"><i class="fas fa-envelope fa-lg"></i></a>
+            </li>
+            <li>
+              <div><a href="https://pratheepaj.github.io/" target="_blank" rel="noopener">Pratheepa Jeganathan</a></div>
+              <a href="https://github.com/PratheepaJ" target="_blank" rel="noopener" aria-label="Pratheepa Jeganathan on GitHub" class="me-2"><i class="fab fa-github fa-lg"></i></a>
+              <a href="https://www.linkedin.com/in/pratheepajega/" target="_blank" rel="noopener" aria-label="Pratheepa Jeganathan on LinkedIn" class="me-2"><i class="fab fa-linkedin fa-lg"></i></a>
+              <a href="mailto:jeganp1@mcmaster.ca" aria-label="Email Pratheepa Jeganathan"><i class="fas fa-envelope fa-lg"></i></a>
+            </li>
+          </ul>
 
 
 navbar:
+  structure:
+    left: [get-started, reference, notebooks]
+  components:
+    get-started:
+      text: Get Started
+      href: articles/tnbc_example.html
+    reference:
+      text: Reference
+      href: articles/function_reference/index.html
+    notebooks:
+      text: Notebooks
+      menu:
+      - text: "TNBC Example (Binary)"
+        href: articles/tnbc_example_binary.html
+      - text: "Mouse Visium Example"
+        href: articles/mouse_example.html
   right:
    - icon: fa-github
-     href: https://github.com/seandavi/BuildABiocWorkshop
-     
+     href: https://github.com/amanpreet60/repSpat_Workshop
+
+articles:
+- title: All vignettes
+  navbar: ~
+  contents:
+  - tnbc_example
+  - tnbc_example_binary
+  - mouse_example
+
+- title: internal
+  contents:
+  - starts_with("function_reference/")
 

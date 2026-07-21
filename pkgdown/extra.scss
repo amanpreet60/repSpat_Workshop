@@ -1,0 +1,255 @@
+// Custom pkgdown overrides for repSpatWorkshop
+// Automatically compiled into the Bootstrap 5 site.
+
+// Shrink the whole type scale by dropping the root font size from 16px to
+// 10px. Because headings/spacing are sized in rem, they scale down
+// proportionally with the body text.
+html {
+  font-size: 10px;
+}
+
+// Side margins on wide screens. Bootstrap's .container tops out at 1320px,
+// which on a ~1500px display leaves only ~90px of breathing room per side and
+// reads as edge-to-edge. Narrow it so the page has a clear margin.
+//
+// The `min(..., 90vw)` term matters: a flat 1200px cap would leave *zero*
+// margin on a viewport that is itself ~1200px wide. The vw term takes over
+// below ~1330px so there's always a proportional gutter.
+//
+// This also applies to the navbar's .container, which is what keeps the brand
+// and nav links aligned with the content column below them.
+//
+// unquote() is required: libsass treats `min()` as its own function and dies
+// with "Incompatible units: 'vw' and 'px'" instead of emitting the CSS min().
+@media (min-width: 1200px) {
+  .container {
+    max-width: unquote("min(1200px, 90vw)");
+  }
+}
+
+// ...except that pkgdown sizes the content column in rem: `main` is capped at
+// 50rem and the TOC column carries a 5rem left gutter. Both were authored
+// against a 16px root (800px + 80px), so the shrunk root above squeezed them
+// to 500px + 50px. main + gutter + TOC then came to ~880px inside a 1320px
+// container, leaving the whole page hugging the left edge on wide screens.
+// Drop the cap and the extra gutter so the Bootstrap 75/25 split fills the
+// container at every breakpoint, and re-create the TOC gap as padding (which
+// comes out of the TOC column instead of widening the row).
+//
+// The `.row >` prefix is required, not cosmetic: pkgdown's rule is
+// `.row > main`, so a bare `main` selector loses on specificity and is
+// silently ignored no matter where it lands in the compiled stylesheet.
+.row > main {
+  max-width: none;
+}
+
+// Scoped to md+ since below that the columns stack and pkgdown gives the TOC
+// its own full-width treatment, where a left indent would just look off.
+@media (min-width: 768px) {
+  .row > aside.col-md-3 {
+    margin-left: 0;
+    padding-left: 40px;
+  }
+}
+
+// Size of copyable code blocks (independent of body text and inline code).
+div.sourceCode.hasCopyButton pre,
+div.sourceCode.hasCopyButton pre code {
+  font-size: 12px;
+}
+
+// Copy-to-clipboard button: lighter (gray instead of near-black) with a
+// bigger icon. Bootstrap 5 buttons are themed via CSS variables.
+.btn-copy-ex {
+  --bs-btn-bg: #6c757d;
+  --bs-btn-border-color: #6c757d;
+  --bs-btn-hover-bg: #5c636a;
+  --bs-btn-hover-border-color: #5c636a;
+  --bs-btn-active-bg: #5c636a;
+  --bs-btn-active-border-color: #5c636a;
+  font-size: 15px;
+}
+
+// Column widths and the TOC gutter are left at the pkgdown + lux defaults —
+// no horizontal margin/width overrides here.
+
+// Let the top navbar scroll away with the page instead of staying pinned.
+// pkgdown hardcodes `fixed-top` on the navbar (position: fixed !important),
+// so we override it and drop the top padding pkgdown reserves for it. This
+// also removes the navbar-content overlap.
+.navbar.fixed-top {
+  position: static !important;
+}
+
+body {
+  padding-top: 0 !important;
+}
+
+// Tighten the large empty gap between the navbar and the page content.
+// pkgdown reserves a 56px top margin on <main> AND the <aside> TOC for the
+// (formerly) fixed navbar; with a static navbar that margin is just dead
+// space. Drop it on both so the "On this page" TOC stays aligned with the
+// content top, and keep a small padding on main.
+main {
+  margin-top: 0 !important;
+  padding-top: 1.5rem;
+}
+
+aside {
+  margin-top: 0 !important;
+}
+
+.page-header {
+  margin-top: 0;
+  padding-top: 0;
+  // lux forces min-height: 104px on the page header, leaving a big empty
+  // gap between the title and its underline. Its rule wins on specificity,
+  // so !important is required to let the header size to its content.
+  min-height: auto !important;
+}
+
+// Add a divider line above each content section heading (they all render
+// uppercase under lux), for clearer section separation. The page title in
+// .page-header is excluded since it already has its own underline.
+main .section > h1,
+main .section > h2,
+main .section > h3,
+main .section > h4,
+main .section > h5,
+main .section > h6 {
+  border-top: 1px solid #dee2e6;
+  padding-top: 1rem;
+  margin-top: 2.5rem;
+}
+
+// The first section sits right below the page-header, which already has its
+// own underline; drop the divider there so it's not a double line.
+main .page-header + .section > h1,
+main .page-header + .section > h2,
+main .page-header + .section > h3,
+main .page-header + .section > h4,
+main .page-header + .section > h5,
+main .page-header + .section > h6 {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0.5rem;
+}
+
+// Justify body paragraphs so the right margin lines up evenly with the
+// horizontal rules and code blocks instead of being ragged. Scoped to the
+// home page and vignette articles only; the citation/authors page has short
+// lines and long URLs that justify into ugly word gaps, so leave it ragged.
+.template-home main p,
+.template-article main p {
+  text-align: justify;
+}
+
+// lux uppercases plain navbar links but leaves dropdown toggles as-is, so the
+// "Notebooks" menu rendered in normal case. Match it to the other nav items.
+.navbar-nav .nav-link.dropdown-toggle {
+  text-transform: uppercase;
+}
+
+// Keep the site brand in its natural case (repSpatWorkshop) instead of lux's
+// UPPERCASE, while the nav links stay uppercase.
+.navbar-brand {
+  text-transform: none !important;
+}
+
+// Bump navbar text ~2 points larger than the (shrunk) defaults so it stays
+// legible: brand, nav links, and the version number.
+.navbar .navbar-brand {
+  font-size: 14.5px;
+}
+
+.navbar-nav .nav-link {
+  font-size: 10.75px;
+}
+
+.navbar .navbar-brand small,
+.navbar small {
+  font-size: 9.65px;
+}
+
+// Enlarge the GitHub icon in the navbar so it reads as a clear link.
+.navbar [class*="fa-github"] {
+  font-size: 1.6rem;
+}
+
+// Enlarge the items in the Notebooks dropdown menu.
+.navbar-nav .dropdown-menu .dropdown-item {
+  font-size: 14.75px;
+}
+
+// Article pages without a right-hand TOC (e.g. the function reference index)
+// leave the col-md-3 slot empty, wasting ~340px on the right. When <main> is
+// the only column, let it span full width and give the reference table's
+// Description column the extra room (pandoc emits a 50/50 <colgroup>).
+.template-article main.col-md-9:only-child {
+  flex: 0 0 100%;
+  max-width: 100%;
+
+  table {
+    width: 100%;
+
+    col:first-child {
+      width: 28%;
+    }
+
+    col:last-child {
+      width: 72%;
+    }
+
+    // lux pads table cells ~21px top/bottom, leaving too much space between
+    // function rows; tighten it.
+    td,
+    th {
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+  }
+}
+
+// The auto-generated Authors/Citation page: drop the Authors section (authors
+// live on the home page) and present it as a plain Citation page, including
+// relabelling the "Authors and Citation" heading and trimming the TOC entry.
+.template-citation-authors {
+  .section.level2:has(> #authors) {
+    display: none;
+  }
+
+  #toc li:has(a[href="#authors"]) {
+    display: none;
+  }
+
+  .page-header h1 {
+    visibility: hidden;
+    position: relative;
+
+    &::before {
+      content: "Citation";
+      visibility: visible;
+      position: absolute;
+      left: 0;
+      top: 0;
+      white-space: nowrap;
+    }
+  }
+}
+
+// Style the "Get Started" navbar item as a filled button instead of a plain
+// text link. Targets the get-started link by its href (the TNBC example).
+.navbar-nav .nav-link[href$="tnbc_example.html"] {
+  background-color: #6c757d;
+  color: #fff !important;
+  border-radius: 0.375rem;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  margin: 0 0.25rem;
+
+  &:hover,
+  &:focus {
+    background-color: #5c636a;
+    color: #fff !important;
+  }
+}

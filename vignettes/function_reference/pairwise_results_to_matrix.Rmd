@@ -1,0 +1,39 @@
+---
+title: "pairwise_results_to_matrix()"
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{Reference: pairwise_results_to_matrix}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```
+pairwise_results_to_matrix(adata, plot=True, alpha=0.05)
+```
+
+Build a region similarity matrix and network plot from MMD results.
+
+## Description
+
+Builds a region-by-region adjacency matrix from `adata.uns["repspat_mmd_results"]`, connecting regions whose adjusted p-value is at least `alpha` (i.e. regions that could not be statistically distinguished). Optionally draws the corresponding network graph.
+
+## Arguments
+
+| Argument | Description |
+| --- | --- |
+| `adata` | AnnData object containing MMD comparison results (see [`multiple_comparison()`](multiple_comparison.html)), or a DataFrame with the same columns. |
+| `plot` | Whether to draw the network graph in addition to returning the matrix. Default `True`. |
+| `alpha` | Significance threshold used to decide which regions are linked. Default `0.05`. |
+
+## Value
+
+A region-by-region adjacency `DataFrame`. Regions considered similar (repeated patterns) are connected with their observed MMD as the edge weight; regions found to be significantly different are left unconnected (`0`).
+
+## Example
+
+```python
+matrix = pairwise_results_to_matrix(adata)
+```
+
+[&larr; Back to reference index](index.html)

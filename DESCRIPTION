@@ -1,28 +1,26 @@
-Package: BuildABiocWorkshop
-Title: Bioconductor or R Workshop Template and Github Actions
-Version: 2.0.1
-Authors@R: 
-    person(given = "Sean",
-           family = "Davis",
-           role = c("aut", "cre"),
-           email = "seandavi@gmail.com",
-           comment = c(ORCID = "0000-0002-8991-6458"))
-Description: This package serves as a template for using github actions to 
-    prepare a Bioconductor Workshop package for use. In particular,
-    a pkgdown website and docker image are generated based on workflow 
-    settings. 
+Package: repSpatWorkshop
+Title: Detecting Repeated Spatial Patterns With repSpat
+Version: 0.0.1
+Authors@R: c(
+    person(given = "Amanpreet", family = "Singh", role = c("aut", "cre"), email = "singa429@mcmaster.ca"),
+    person(given = "Pratheepa", family = "Jeganathan", role = "aut", email = "jeganp1@mcmaster.ca"))
+Description: A 1.5 hour Bioconductor workshop introducing repSpat for detecting repeated spatial patterns in spatial omics data. The workshop covers data loading, thresholded features, spatially constrained clustering, block construction, MMD-based comparisons, and interpretation of repeated spatial regions.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.0
-Depends: 
-    Biobase
-Suggests: 
+LazyData: false
+URL: https://amanpreet60.github.io/repSpat_Workshop/
+BugReports: https://github.com/amanpreet60/repSpat_Workshop/issues
+DockerImage: ghcr.io/amanpreet60/repspatworkshop:latest
+biocViews: Workshop, Spatial, SingleCell, Transcriptomics
+Imports:
+    BiocStyle,
+    SpatialExperiment,
+    SingleCellExperiment,
+    SummarizedExperiment,
+    reticulate,
     knitr,
-    rmarkdown,
-    pkgdown
-URL: https://seandavi.github.io/BuildABiocWorkshop/
-BugReports: https://github.com/seandavi/BuildABiocWorkshop/issues/new/choose
+    rmarkdown
+Suggests:
+    pkgdown,
+    sessioninfo
 VignetteBuilder: knitr
-DockerImage: ghcr.io/seandavi/buildabiocworkshop:latest

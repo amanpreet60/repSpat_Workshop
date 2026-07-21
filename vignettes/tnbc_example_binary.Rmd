@@ -1,0 +1,274 @@
+---
+title: "TNBC Example (Binary): Detecting Repeated Spatial Patterns"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  %\VignetteIndexEntry{TNBC Example With Thresholds: Detecting Repeated Spatial Patterns}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+params:
+  run_analysis: false
+  show_data_prep_code: false
+---
+
+# Introduction
+
+This is the binary version of the TNBC workflow. It follows the same steps as the main example, but instead of using the continuous marker measurements, we threshold each marker into a present (`1`) or absent (`0`) value and compare cells with the Jaccard metric. See the main TNBC vignette for the detailed explanation of each step.
+
+# Load libraries
+
+```{r setup, message=FALSE, warning=FALSE}
+library(BiocStyle)
+library(SpatialExperiment)
+library(reticulate)
+```
+
+```{r import-package, eval=exists("params") && isTRUE(params$run_analysis), message=FALSE, warning=FALSE}
+anndata <- import("anndata", convert = FALSE)
+repspat <- import("repspat", convert = FALSE)
+```
+
+# Prepare the Sample
+
+We convert the `.rds` file into an AnnData object, threshold each marker into a present/absent value, and store the result in a `"binary"` layer alongside the original measurements in `X`. A marker is present when its value is equal to or greater than its threshold.
+
+```{r marker-thresholds, echo=exists("params") && isTRUE(params$show_data_prep_code)}
+thresholds <- list(
+    betaCatenin = 0.253063192,
+    CD11b = 1.100536222,
+    CD11c = 0.213556566,
+    CD138 = 1.038502303,
+    CD16 = 0.304460727,
+    CD20 = 0.296460556,
+    CD209 = 0.406669859,
+    CD3 = 0.250762424,
+    CD31 = 1.006381212,
+    CD4 = 0.223762,
+    CD45 = 0.327450495,
+    CD45RO = 0.236334141,
+    CD56 = 0.770183826,
+    CD63 = 0.268126101,
+    CD68 = 1.128510101,
+    CD8 = 0.260237333,
+    dsDNA = 0.20301697,
+    EGFR = 1.069264889,
+    FoxP3 = 0.34649899,
+    H3K27me3 = 0.201893232,
+    H3K9ac = 0.406071229,
+    HLA_Class_1 = 0.23773137,
+    HLADR = 0.4408116,
+    IDO = 0.312824202,
+    Keratin17 = 0.291843697,
+    Keratin6 = 0.282480556,
+    Ki67 = 0.210413737,
+    Lag3 = 1.239097091,
+    MPO = 0.324934545,
+    p53 = 0.265704293,
+    panKeratin = 0.244129571,
+    PD1 = 0.972859909,
+    PDL1 = 1.352024101,
+    pS6 = 0.282699091,
+    SMA = 0.250358024,
+    Vimentin = 0.28239596
+)
+```
+
+```{r create-h5ad-file, eval=FALSE}
+rds_path <- "../inst/extdata/03_TNBC_2018_spe.rds"
+h5ad_path <- "../inst/extdata/03_TNBC_2018_spe_binary.h5ad"
+
+load(rds_path)
+
+expression <- t(as.matrix(assay(spe, "exprs")))
+
+threshold_values <- unlist(thresholds, use.names = TRUE)
+binary_matrix <- sweep(expression,2,threshold_values[colnames(expression)],FUN = ">=") + 0L
+
+cell_metadata <- as.data.frame(colData(spe), optional = TRUE)
+rownames(cell_metadata) <- colnames(spe)
+
+feature_metadata <- data.frame(
+    feature_name = rownames(spe),
+    row.names = rownames(spe)
+)
+
+adata <- anndata$AnnData(
+    X = expression,
+    obs = cell_metadata,
+    var = feature_metadata
+)
+
+py_set_item(adata$layers, "binary", binary_matrix)
+py_set_item(adata$obsm, "spatial", spatialCoords(spe)[, 1:2, drop = FALSE])
+
+adata$write_h5ad(h5ad_path)
+adata
+```
+
+# Compute Feature Distances
+
+We select `Sample_04` and compute pairwise distances from the `"binary"` layer using the `"jaccard"` metric, which suits binary present/absent data.
+
+```{r compute-distances, eval=exists("params") && isTRUE(params$run_analysis)}
+py$adata <- adata
+adata <- py_eval("adata[adata.obs['sample_id'] == 'Sample_04'].copy()", convert = FALSE)
+
+adata <- repspat$compute_distances(
+    adata,
+    layer = "binary",
+    metric = "jaccard"
+)
+adata$obs$sample_id$unique()
+```
+
+```{r inspect-adata-parts, eval=exists("params") && isTRUE(params$run_analysis)}
+cat("Feature matrix: first 5 cells\n")
+print(py_to_r(py_get_item(adata$layers, "binary"))[1:5, 1:11])
+
+cat("\nSpatial coordinates: first 5 cells\n")
+print(head(py_to_r(py_get_item(adata$obsm, "spatial")), 5))
+
+cat("\nDistance matrix: first 5 cells x first 5 cells\n")
+print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
+```
+
+# Select Spatial Region Settings
+
+We test combinations of neighborhood size and region count and score each with the custom silhouette score.
+
+```{r silhouette-analysis, eval=exists("params") && isTRUE(params$run_analysis)}
+data <- repspat$spatial_silhouette_analysis(
+    adata = adata,
+    n_neighbors_list = list(as.integer(6), as.integer(8)),
+    n_clusters_range = as.integer(4:8)
+)
+cat("\n--------------------\n\n")
+py_get_item(data$uns, "silhouette_scores")
+```
+
+We proceed with `n_neighbors = 8` and `n_clusters = 7`.
+
+# Divide the Tissue Into Spatial Regions
+
+We apply spatially constrained hierarchical clustering with the chosen settings.
+
+```{r clustering, eval=exists("params") && isTRUE(params$run_analysis)}
+adata <- repspat$spatial_constrained_hac(
+    adata = adata,
+    n_clusters = as.integer(7),
+    n_neighs = as.integer(8)
+)
+cat("\n--------------------\n\n")
+py_get_item(data$obs, "labels")
+```
+
+# Visualize the Spatial Regions
+
+```{r plot-spatial-regions, eval=exists("params") && isTRUE(params$run_analysis), out.width="100%"}
+plt <- reticulate::import("matplotlib.pyplot")
+plot_result <- repspat$plot_spatial_clusters(
+    adata = adata,
+    label_key = "labels",
+    figsize = reticulate::tuple(10, 7),
+    point_size = 4L
+)
+plt$subplots_adjust(right = 0.72)
+plt$show()
+```
+
+# Visualize Features Across Regions
+
+For binary data, this shows the features most frequently present in each region.
+
+```{r plot-features, eval=exists("params") && isTRUE(params$run_analysis)}
+plt <- reticulate::import("matplotlib.pyplot")
+feature_plots <- repspat$plot_cluster_feature_presence(
+    adata = data,
+    label_key = "labels",
+    top_n = as.integer(10),
+    figsize = reticulate::tuple(8, 3),
+    point_size = 2L,
+    alpha = 1.0
+)
+
+for (fig_axes in reticulate::iterate(feature_plots$values())) {
+    fig <- py_get_item(fig_axes, 0L)
+    plt$figure(fig$number)
+    plt$show()
+}
+```
+
+# Create Permutation Blocks
+
+We group cells into blocks within each region so permutation happens at the block level.
+
+```{r build-blocks, eval=exists("params") && isTRUE(params$run_analysis)}
+adata <- repspat$create_blocks(
+    adata = adata,
+    knn = as.integer(8)
+)
+
+cat("\n--------------------\n\n")
+py_get_item(data$obs, "repspat_block_id")
+```
+
+# Compare Region Pairs
+
+We compare every pair of regions with MMD, using the `"IMQ"` kernel, 200 block permutations, and Benjamini–Hochberg correction.
+
+```{r mmd-results, eval=exists("params") && isTRUE(params$run_analysis)}
+adata <- repspat$multiple_comparison(
+    adata = adata,
+    kernel = "IMQ",
+    nperm = as.integer(200),
+    adj_p = "BH"
+)
+
+cat("\n--------------------\n\n")
+py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = list("null_dist")))
+```
+
+# Visualize Which Regions Are Not Significantly Different
+
+Region pairs with `adj_p >= 0.05` are repeated spatial patterns and are drawn as a network.
+
+```{r plot-similarity-network, eval=exists("params") && isTRUE(params$run_analysis), warning=FALSE, out.width="100%"}
+similarity_matrix <- py_to_r(repspat$pairwise_results_to_matrix(
+    adata,
+    plot = TRUE
+))
+
+similarity_matrix
+```
+
+# Merge Regions Into Repeated Spatial Patterns
+
+We merge the region labels that could not be statistically distinguished into a single shared label.
+
+```{r merge-regions, eval=exists("params") && isTRUE(params$run_analysis), out.width="100%"}
+clusters_to_merge <- c(3, 5, 6)   # edit: region labels you want merged
+new_label <- min(clusters_to_merge)
+labels <- py_to_r(py_get_item(adata$obs, "labels"))
+labels[labels %in% clusters_to_merge] <- new_label
+py_set_item(adata$obs, "updated_labels", as.integer(labels))
+```
+
+# Visualize the Merged Regions
+
+```{r plot-merged-regions, eval=exists("params") && isTRUE(params$run_analysis), out.width="100%"}
+plt <- reticulate::import("matplotlib.pyplot")
+plot_result <- repspat$plot_spatial_clusters(
+    adata = adata,
+    label_key = "updated_labels",
+    figsize = reticulate::tuple(10, 7),
+    point_size = 4L
+)
+plt$subplots_adjust(right = 0.72)
+plt$show()
+```
+
+# Conclusion
+
+Applied to the TNBC sample using binary marker profiles and the Jaccard metric, `repSpat` recovered repeated patterns among the clustered regions. As with the continuous version, repeated patterns are best interpreted alongside region size, location, and biological context rather than the test result in isolation.

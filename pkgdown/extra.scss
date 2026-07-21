@@ -23,7 +23,7 @@ html {
 // with "Incompatible units: 'vw' and 'px'" instead of emitting the CSS min().
 @media (min-width: 1200px) {
   .container {
-    max-width: unquote("min(1200px, 90vw)");
+    max-width: unquote("min(960px, 82vw)");
   }
 }
 
@@ -45,10 +45,29 @@ html {
 
 // Scoped to md+ since below that the columns stack and pkgdown gives the TOC
 // its own full-width treatment, where a left indent would just look off.
+// Give the TOC/links column a fixed width and let main absorb whatever is
+// left, rather than Bootstrap's proportional 75/25 split. This way, tightening
+// the container above takes space out of the *body text* and leaves the links
+// column alone — otherwise the TOC shrinks too and entries like "Citing
+// repSpatWorkshop" wrap onto two lines.
+//
+// `flex: 1 1 0` on main is the load-bearing part: with `width: auto` /
+// `flex-basis: auto` it claims its full content width, overflows the row, and
+// wraps the TOC underneath it instead of sitting beside it.
 @media (min-width: 768px) {
   .row > aside.col-md-3 {
+    flex: 0 0 300px;
+    width: 300px;
+    max-width: none;
     margin-left: 0;
     padding-left: 40px;
+  }
+
+  .row > main.col-md-9 {
+    flex: 1 1 0;
+    width: auto;
+    max-width: none;
+    min-width: 0;
   }
 }
 
@@ -56,6 +75,30 @@ html {
 div.sourceCode.hasCopyButton pre,
 div.sourceCode.hasCopyButton pre code {
   font-size: 12px;
+}
+
+// Body copy one notch smaller (18px -> 16px). Deliberately scoped to
+// paragraphs, list items and table cells so headings (17.5px), inline code
+// (13.8px), and code blocks (12px) are all left untouched.
+//
+// `main td` matters for the function reference index, which is a table rather
+// than prose — without it that page keeps 18px body text while every other
+// page drops to 16px.
+main p,
+main li,
+main td {
+  font-size: 16px;
+}
+
+// "On this page" TOC, bumped for legibility: the heading 12.5px -> 16.5px and
+// the entries 10.75px -> 14.75px. Both were casualties of the 10px root font
+// size, which left the TOC noticeably smaller than everything around it.
+#toc h2 {
+  font-size: 16.5px;
+}
+
+#toc .nav-link {
+  font-size: 14.75px;
 }
 
 // Copy-to-clipboard button: lighter (gray instead of near-black) with a
@@ -163,7 +206,7 @@ main .page-header + .section > h6 {
 }
 
 .navbar-nav .nav-link {
-  font-size: 10.75px;
+  font-size: 12.75px;
 }
 
 .navbar .navbar-brand small,

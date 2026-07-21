@@ -1,0 +1,20 @@
+pandoc: '3.10'
+pkgdown: 2.2.1
+pkgdown_sha: ~
+articles:
+  function_reference/compute_distances: function_reference/compute_distances.html
+  function_reference/create_blocks: function_reference/create_blocks.html
+  function_reference/index: function_reference/index.html
+  mouse_example: mouse_example.html
+  function_reference/multiple_comparison: function_reference/multiple_comparison.html
+  function_reference/pairwise_results_to_matrix: function_reference/pairwise_results_to_matrix.html
+  function_reference/plot_cluster_feature_presence: function_reference/plot_cluster_feature_presence.html
+  function_reference/plot_spatial_clusters: function_reference/plot_spatial_clusters.html
+  function_reference/spatial_constrained_hac: function_reference/spatial_constrained_hac.html
+  function_reference/spatial_silhouette_analysis: function_reference/spatial_silhouette_analysis.html
+  tnbc_example_binary: tnbc_example_binary.html
+  tnbc_example: tnbc_example.html
+last_built: 2026-07-21T16:43Z
+urls:
+  reference: https://amanpreet60.github.io/repSpat_Workshop/reference
+  article: https://amanpreet60.github.io/repSpat_Workshop/articles

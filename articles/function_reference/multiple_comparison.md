@@ -1,0 +1,46 @@
+# multiple_comparison()
+
+    multiple_comparison(adata, kernel, kernel_param, nperm, adj_p)
+
+Pairwise MMD comparison between all regions, with multiple-testing
+correction.
+
+## Description
+
+Runs a pairwise two-sample MMD test between every pair of regions, using
+regions, block IDs, and distances read from the AnnData object. Adjusts
+p-values across all pairs, stores results in
+`adata.uns["repspat_mmd_results"]`, prints the storage location, and
+returns the same `adata`.
+
+## Arguments
+
+| Argument | Description |
+|----|----|
+| `adata` | AnnData object containing distances, region labels, and block assignments. |
+| `kernel` | Kernel used to convert distances into similarities: `"Gaussian"` or `"IMQ"`. Default `"Gaussian"`. |
+| `kernel_param` | Kernel bandwidth/scale parameter. Default `1`. |
+| `nperm` | Number of block permutations per pair. Default `200`. |
+| `adj_p` | Multiple-testing correction method: `"BH"`, `"bonferroni"`, or `"holm"`. |
+| `region_key` | Column in `adata.obs` containing region labels. Default `"labels"`. |
+| `block_key` | Column in `adata.obs` containing block IDs. Default `"repspat_block_id"`. |
+| `distance_key` | Entry in `adata.obsp` containing the feature distance matrix. Default `"repspat_distances"`. |
+
+## Value
+
+The same AnnData object, updated in place, with a results DataFrame
+stored in `adata.uns["repspat_mmd_results"]` containing `region_1`,
+`region_2`, `obs_mmd_sq`, `p_value`, and `adj_p` for every region pair.
+
+## Example
+
+``` python
+adata = create_blocks(adata, knn=8)
+adata = multiple_comparison(adata, kernel="IMQ")
+
+results = adata.uns["repspat_mmd_results"]
+print(results[results["adj_p"] >= 0.05])
+```
+
+[← Back to reference
+index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

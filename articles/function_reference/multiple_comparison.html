@@ -63,15 +63,12 @@
 
     
     
-<pre><code><span><span class="fu">multiple_comparison</span><span class="op">(</span><span class="va">adata</span>, <span class="va">kernel</span>, <span class="va">kernel_param</span>, <span class="va">nperm</span>, <span class="va">adj_p</span><span class="op">)</span></span></code></pre>
-<p>Pairwise MMD comparison between all regions, with multiple-testing
-correction.</p>
 <div class="section level2">
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
-<p>Runs a pairwise two-sample MMD test between every pair of regions,
-using regions, block IDs, and distances read from the AnnData object.
-Adjusts p-values across all pairs, stores results in
+<p>Runs a pairwise two-sample MMD^2 test between every pair of clusters,
+using cluster labels, block IDs, and distances read from the AnnData
+object. Adjusts p-values across all pairs, stores results in
 <code>adata.uns["repspat_mmd_results"]</code>, prints the storage
 location, and returns the same <code>adata</code>.</p>
 </div>
@@ -90,7 +87,7 @@ location, and returns the same <code>adata</code>.</p>
 <tbody>
 <tr class="odd">
 <td><code>adata</code></td>
-<td>AnnData object containing distances, region labels, and block
+<td>AnnData object containing distances, cluster labels, and block
 assignments.</td>
 </tr>
 <tr class="even">
@@ -115,7 +112,7 @@ assignments.</td>
 </tr>
 <tr class="even">
 <td><code>region_key</code></td>
-<td>Column in <code>adata.obs</code> containing region labels. Default
+<td>Column in <code>adata.obs</code> containing cluster labels. Default
 <code>"labels"</code>.</td>
 </tr>
 <tr class="odd">
@@ -137,16 +134,16 @@ matrix. Default <code>"repspat_distances"</code>.</td>
 <p>The same AnnData object, updated in place, with a results DataFrame
 stored in <code>adata.uns["repspat_mmd_results"]</code> containing
 <code>region_1</code>, <code>region_2</code>, <code>obs_mmd_sq</code>,
-<code>p_value</code>, and <code>adj_p</code> for every region pair.</p>
+<code>p_value</code>, and <code>adj_p</code> for every cluster pair.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>adata <span class="op">=</span> create_blocks(adata, knn<span class="op">=</span><span class="dv">8</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>adata <span class="op">=</span> multiple_comparison(adata, kernel<span class="op">=</span><span class="st">"IMQ"</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>results <span class="op">=</span> adata.uns[<span class="st">"repspat_mmd_results"</span>]</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="bu">print</span>(results[results[<span class="st">"adj_p"</span>] <span class="op">&gt;=</span> <span class="fl">0.05</span>])</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>adata <span class="op">=</span> create_blocks(adata, knn<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>adata <span class="op">=</span> multiple_comparison(adata, kernel<span class="op">=</span><span class="st">"IMQ"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>results <span class="op">=</span> adata.uns[<span class="st">"repspat_mmd_results"</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="bu">print</span>(results[results[<span class="st">"adj_p"</span>] <span class="op">&gt;=</span> <span class="fl">0.05</span>])</span></code></pre></div>
 <p><a href="index.html">← Back to reference index</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -96,10 +96,10 @@ cat("\nDistance matrix: first 5 cells x first 5 cells\n")
 print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 ```
 
-## Select Spatial Region Settings
+## Select Clustering Parameters
 
-We test combinations of neighborhood size and region count and score
-each with the custom silhouette score.
+We test combinations of neighborhood size and cluster count and score
+each with the spatial silhouette score.
 
 ``` r
 
@@ -115,10 +115,10 @@ py_get_item(data$uns, "silhouette_scores")
 For this crop the scores are highest at a small number of clusters, so
 we proceed with `n_neighbors = 8` and `n_clusters = 7`.
 
-## Divide the Tissue Into Spatial Regions
+## Construct Spatially Constrained Clusters
 
-We apply spatially constrained hierarchical clustering with the chosen
-settings.
+We apply constrained agglomerative hierarchical clustering (CAHC) with
+the chosen parameters.
 
 ``` r
 
@@ -131,10 +131,10 @@ cat("\n--------------------\n\n")
 py_get_item(data$obs, "labels")
 ```
 
-The crop is divided into 7 spatially coherent regions, each occupying a
+The crop is divided into 7 spatially coherent clusters, each occupying a
 connected part of the tissue.
 
-## Visualize the Spatial Regions
+## Visualize the Spatially Constrained Clusters
 
 ``` r
 
@@ -149,10 +149,10 @@ plt$subplots_adjust(right = 0.72)
 plt$show()
 ```
 
-## Visualize Features Across Regions
+## Visualize Features Across Clusters
 
-This shows the numeric features most enriched in each region compared to
-the rest of the tissue.
+This shows the numeric features most enriched in each cluster compared
+to the rest of the tissue.
 
 ``` r
 
@@ -173,9 +173,9 @@ for (fig_axes in reticulate::iterate(feature_plots$values())) {
 }
 ```
 
-## Create Permutation Blocks
+## Create blocks for permutation
 
-We group cells into blocks within each region so permutation happens at
+We group cells into blocks within each cluster so permutation happens at
 the block level.
 
 ``` r
@@ -189,10 +189,11 @@ cat("\n--------------------\n\n")
 py_get_item(data$obs, "repspat_block_id")
 ```
 
-## Compare Region Pairs
+## Test Spatial Invariance Between Clusters
 
-We compare every pair of regions with MMD, using the `"IMQ"` kernel, 200
-block permutations, and Benjamini–Hochberg correction.
+We compare every pair of clusters with the MMD^2 statistic, using the
+`"IMQ"` kernel, 200 block permutations, and Benjamini–Hochberg
+correction.
 
 ``` r
 
@@ -207,13 +208,13 @@ cat("\n--------------------\n\n")
 py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = list("null_dist")))
 ```
 
-Region pairs with a small `obs_mmd_sq` and a large `adj_p` have similar
-feature profiles; those with a large MMD and small `adj_p` are the
-clearly distinct regions.
+Cluster pairs with a small `obs_mmd_sq` and a large `adj_p` have similar
+feature profiles; those with a large MMD^2 and small `adj_p` are the
+clearly distinct clusters.
 
-## Visualize Which Regions Are Not Significantly Different
+## Visualize Repeated Spatial Patterns
 
-Region pairs with `adj_p >= 0.05` are repeated spatial patterns and are
+Cluster pairs with `adj_p >= 0.05` are repeated spatial patterns and are
 drawn as a network.
 
 ``` r
@@ -226,16 +227,16 @@ similarity_matrix <- py_to_r(repspat$pairwise_results_to_matrix(
 similarity_matrix
 ```
 
-For this dataset, every region pair was significantly different
+For this dataset, every cluster pair was significantly different
 (`adj_p < 0.05`), so the network has no connections. No repeated spatial
-patterns were detected, and there is nothing to merge.
+patterns were detected, and there is nothing to relabel.
 
 ## Conclusion
 
 Applied to a cropped portion of the mouse Visium sample, `repSpat` found
-all seven regions to be statistically distinct, so no repeated spatial
+all seven clusters to be statistically distinct, so no repeated spatial
 patterns were recovered here. This is itself an informative result:
-within this small contiguous crop, the regions carry genuinely different
-feature profiles. As with the TNBC example, results are best interpreted
-alongside region size, location, and biological context rather than the
-test result in isolation.
+within this small contiguous crop, the clusters carry genuinely
+different feature profiles. As with the TNBC example, results are best
+interpreted alongside cluster size, location, and biological context
+rather than the test result in isolation.

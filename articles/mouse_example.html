@@ -152,10 +152,10 @@ metric.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/r-py-conversion.html" class="external-link">py_to_r</a></span><span class="op">(</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">adata</span><span class="op">$</span><span class="va">obsp</span>, <span class="st">"repspat_distances"</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="select-spatial-region-settings">Select Spatial Region Settings<a class="anchor" aria-label="anchor" href="#select-spatial-region-settings"></a>
+<h2 id="select-clustering-parameters">Select Clustering Parameters<a class="anchor" aria-label="anchor" href="#select-clustering-parameters"></a>
 </h2>
-<p>We test combinations of neighborhood size and region count and score
-each with the custom silhouette score.</p>
+<p>We test combinations of neighborhood size and cluster count and score
+each with the spatial silhouette score.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_silhouette_analysis</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -169,10 +169,10 @@ so we proceed with <code>n_neighbors = 8</code> and
 <code>n_clusters = 7</code>.</p>
 </div>
 <div class="section level2">
-<h2 id="divide-the-tissue-into-spatial-regions">Divide the Tissue Into Spatial Regions<a class="anchor" aria-label="anchor" href="#divide-the-tissue-into-spatial-regions"></a>
+<h2 id="construct-spatially-constrained-clusters">Construct Spatially Constrained Clusters<a class="anchor" aria-label="anchor" href="#construct-spatially-constrained-clusters"></a>
 </h2>
-<p>We apply spatially constrained hierarchical clustering with the
-chosen settings.</p>
+<p>We apply constrained agglomerative hierarchical clustering (CAHC)
+with the chosen parameters.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_constrained_hac</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -181,11 +181,11 @@ chosen settings.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span>, <span class="st">"labels"</span><span class="op">)</span></span></code></pre></div>
-<p>The crop is divided into 7 spatially coherent regions, each occupying
-a connected part of the tissue.</p>
+<p>The crop is divided into 7 spatially coherent clusters, each
+occupying a connected part of the tissue.</p>
 </div>
 <div class="section level2">
-<h2 id="visualize-the-spatial-regions">Visualize the Spatial Regions<a class="anchor" aria-label="anchor" href="#visualize-the-spatial-regions"></a>
+<h2 id="visualize-the-spatially-constrained-clusters">Visualize the Spatially Constrained Clusters<a class="anchor" aria-label="anchor" href="#visualize-the-spatially-constrained-clusters"></a>
 </h2>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"matplotlib.pyplot"</span><span class="op">)</span></span>
@@ -199,10 +199,10 @@ a connected part of the tissue.</p>
 <span><span class="va">plt</span><span class="op">$</span><span class="fu">show</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="visualize-features-across-regions">Visualize Features Across Regions<a class="anchor" aria-label="anchor" href="#visualize-features-across-regions"></a>
+<h2 id="visualize-features-across-clusters">Visualize Features Across Clusters<a class="anchor" aria-label="anchor" href="#visualize-features-across-clusters"></a>
 </h2>
-<p>This shows the numeric features most enriched in each region compared
-to the rest of the tissue.</p>
+<p>This shows the numeric features most enriched in each cluster
+compared to the rest of the tissue.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"matplotlib.pyplot"</span><span class="op">)</span></span>
 <span><span class="va">feature_plots</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">plot_cluster_feature_presence</span><span class="op">(</span></span>
@@ -221,9 +221,9 @@ to the rest of the tissue.</p>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="create-permutation-blocks">Create Permutation Blocks<a class="anchor" aria-label="anchor" href="#create-permutation-blocks"></a>
+<h2 id="create-blocks-for-permutation">Create blocks for permutation<a class="anchor" aria-label="anchor" href="#create-blocks-for-permutation"></a>
 </h2>
-<p>We group cells into blocks within each region so permutation happens
+<p>We group cells into blocks within each cluster so permutation happens
 at the block level.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">create_blocks</span><span class="op">(</span></span>
@@ -235,9 +235,9 @@ at the block level.</p>
 <span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span>, <span class="st">"repspat_block_id"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="compare-region-pairs">Compare Region Pairs<a class="anchor" aria-label="anchor" href="#compare-region-pairs"></a>
+<h2 id="test-spatial-invariance-between-clusters">Test Spatial Invariance Between Clusters<a class="anchor" aria-label="anchor" href="#test-spatial-invariance-between-clusters"></a>
 </h2>
-<p>We compare every pair of regions with MMD, using the
+<p>We compare every pair of clusters with the MMD^2 statistic, using the
 <code>"IMQ"</code> kernel, 200 block permutations, and
 Benjamini–Hochberg correction.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -250,14 +250,15 @@ Benjamini–Hochberg correction.</p>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/r-py-conversion.html" class="external-link">py_to_r</a></span><span class="op">(</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">adata</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"repspat_mmd_results"</span><span class="op">)</span><span class="op">$</span><span class="fu">head</span><span class="op">(</span><span class="fl">5L</span><span class="op">)</span><span class="op">$</span><span class="fu">drop</span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"null_dist"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Region pairs with a small <code>obs_mmd_sq</code> and a large
-<code>adj_p</code> have similar feature profiles; those with a large MMD
-and small <code>adj_p</code> are the clearly distinct regions.</p>
+<p>Cluster pairs with a small <code>obs_mmd_sq</code> and a large
+<code>adj_p</code> have similar feature profiles; those with a large
+MMD^2 and small <code>adj_p</code> are the clearly distinct
+clusters.</p>
 </div>
 <div class="section level2">
-<h2 id="visualize-which-regions-are-not-significantly-different">Visualize Which Regions Are Not Significantly Different<a class="anchor" aria-label="anchor" href="#visualize-which-regions-are-not-significantly-different"></a>
+<h2 id="visualize-repeated-spatial-patterns">Visualize Repeated Spatial Patterns<a class="anchor" aria-label="anchor" href="#visualize-repeated-spatial-patterns"></a>
 </h2>
-<p>Region pairs with <code>adj_p &gt;= 0.05</code> are repeated spatial
+<p>Cluster pairs with <code>adj_p &gt;= 0.05</code> are repeated spatial
 patterns and are drawn as a network.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">similarity_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/r-py-conversion.html" class="external-link">py_to_r</a></span><span class="op">(</span><span class="va">repspat</span><span class="op">$</span><span class="fu">pairwise_results_to_matrix</span><span class="op">(</span></span>
@@ -266,20 +267,20 @@ patterns and are drawn as a network.</p>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">similarity_matrix</span></span></code></pre></div>
-<p>For this dataset, every region pair was significantly different
+<p>For this dataset, every cluster pair was significantly different
 (<code>adj_p &lt; 0.05</code>), so the network has no connections. No
 repeated spatial patterns were detected, and there is nothing to
-merge.</p>
+relabel.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
 <p>Applied to a cropped portion of the mouse Visium sample,
-<code>repSpat</code> found all seven regions to be statistically
+<code>repSpat</code> found all seven clusters to be statistically
 distinct, so no repeated spatial patterns were recovered here. This is
 itself an informative result: within this small contiguous crop, the
-regions carry genuinely different feature profiles. As with the TNBC
-example, results are best interpreted alongside region size, location,
+clusters carry genuinely different feature profiles. As with the TNBC
+example, results are best interpreted alongside cluster size, location,
 and biological context rather than the test result in isolation.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

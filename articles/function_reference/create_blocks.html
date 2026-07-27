@@ -63,14 +63,11 @@
 
     
     
-<pre><code><span><span class="fu">create_blocks</span><span class="op">(</span><span class="va">adata</span>, <span class="va">knn</span><span class="op">)</span></span></code></pre>
-<p>Create permutation blocks within each region for block-based
-testing.</p>
 <div class="section level2">
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
-<p>Splits each region into smaller KMeans-based blocks so that cells
-within the same tissue region are not treated as fully independent
+<p>Splits each cluster into smaller KMeans-based blocks so that cells
+within the same cluster are not treated as fully independent
 observations during permutation testing. Stores block IDs in
 <code>adata.obs["repspat_block_id"]</code>, prints the storage location,
 and returns the same <code>adata</code>.</p>
@@ -90,7 +87,7 @@ and returns the same <code>adata</code>.</p>
 <tbody>
 <tr class="odd">
 <td><code>adata</code></td>
-<td>AnnData object with region labels already assigned (see <a href="spatial_constrained_hac.html"><code>spatial_constrained_hac()</code></a>).</td>
+<td>AnnData object with cluster labels already assigned (see <a href="spatial_constrained_hac.html"><code>spatial_constrained_hac()</code></a>).</td>
 </tr>
 <tr class="even">
 <td><code>knn</code></td>
@@ -98,7 +95,7 @@ and returns the same <code>adata</code>.</p>
 </tr>
 <tr class="odd">
 <td><code>region_key</code></td>
-<td>Column in <code>adata.obs</code> containing the region labels.
+<td>Column in <code>adata.obs</code> containing the cluster labels.
 Default <code>"labels"</code>.</td>
 </tr>
 <tr class="even">
@@ -118,7 +115,7 @@ for every cell stored in <code>adata.obs[block_key]</code>.</p>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>adata <span class="op">=</span> create_blocks(adata, knn<span class="op">=</span><span class="dv">8</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>adata <span class="op">=</span> create_blocks(adata, knn<span class="op">=</span><span class="dv">8</span>)</span></code></pre></div>
 <p><a href="index.html">← Back to reference index</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

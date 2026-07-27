@@ -63,15 +63,14 @@
 
     
     
-<pre><code>plot_cluster_feature_presence(adata, top_n=5, feature_columns=None, figsize=(8, 3), point_size=2, alpha=1.0, label_key="labels")</code></pre>
-<p>Plot each region alongside its most defining features.</p>
 <div class="section level2">
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
-<p>For every region, draws a spatial highlight next to a chart of its
+<p>For every cluster, draws a spatial highlight next to a chart of its
 most defining features. Binary features are shown as presence rates
-within the region; if no binary features are available, numeric features
-are shown as cluster-vs-rest standardized enrichment scores.</p>
+within the cluster; if no binary features are available, numeric
+features are shown as cluster-vs-rest standardized enrichment
+scores.</p>
 </div>
 <div class="section level2">
 <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a>
@@ -88,11 +87,11 @@ are shown as cluster-vs-rest standardized enrichment scores.</p>
 <tbody>
 <tr class="odd">
 <td><code>adata</code></td>
-<td>AnnData object with region labels assigned.</td>
+<td>AnnData object with cluster labels assigned.</td>
 </tr>
 <tr class="even">
 <td><code>top_n</code></td>
-<td>Number of top features to display per region. Default
+<td>Number of top features to display per cluster. Default
 <code>5</code>.</td>
 </tr>
 <tr class="odd">
@@ -103,7 +102,8 @@ binary.</td>
 </tr>
 <tr class="even">
 <td><code>figsize</code></td>
-<td>Figure size per region, in inches. Default <code>(8, 3)</code>.</td>
+<td>Figure size per cluster, in inches. Default
+<code>(8, 3)</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>point_size</code></td>
@@ -115,7 +115,7 @@ binary.</td>
 </tr>
 <tr class="odd">
 <td><code>label_key</code></td>
-<td>Column in <code>adata.obs</code> containing the region labels.
+<td>Column in <code>adata.obs</code> containing the cluster labels.
 Default <code>"labels"</code>.</td>
 </tr>
 </tbody>
@@ -124,13 +124,13 @@ Default <code>"labels"</code>.</td>
 <div class="section level2">
 <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a>
 </h2>
-<p>A dict mapping each region’s cluster ID to its
-<code>(figure, axes)</code> pair.</p>
+<p>A dict mapping each cluster’s ID to its <code>(figure, axes)</code>
+pair.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>cluster_figures <span class="op">=</span> plot_cluster_feature_presence(adata, top_n<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>cluster_figures <span class="op">=</span> plot_cluster_feature_presence(adata, top_n<span class="op">=</span><span class="dv">10</span>)</span></code></pre></div>
 <p><a href="index.html">← Back to reference index</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

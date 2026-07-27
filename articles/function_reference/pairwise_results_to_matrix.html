@@ -63,17 +63,14 @@
 
     
     
-<pre><code><span><span class="fu">pairwise_results_to_matrix</span><span class="op">(</span><span class="va">adata</span>, plot<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.05</span><span class="op">)</span></span></code></pre>
-<p>Build a region similarity matrix and network plot from MMD
-results.</p>
 <div class="section level2">
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
-<p>Builds a region-by-region adjacency matrix from
-<code>adata.uns["repspat_mmd_results"]</code>, connecting regions whose
-adjusted p-value is at least <code>alpha</code> (i.e. regions that could
-not be statistically distinguished). Optionally draws the corresponding
-network graph.</p>
+<p>Builds a cluster-by-cluster adjacency matrix from
+<code>adata.uns["repspat_mmd_results"]</code>, connecting clusters whose
+adjusted p-value is at least <code>alpha</code> (i.e. clusters that
+could not be statistically distinguished). Optionally draws the
+corresponding network graph.</p>
 </div>
 <div class="section level2">
 <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a>
@@ -90,7 +87,7 @@ network graph.</p>
 <tbody>
 <tr class="odd">
 <td><code>adata</code></td>
-<td>AnnData object containing MMD comparison results (see <a href="multiple_comparison.html"><code>multiple_comparison()</code></a>),
+<td>AnnData object containing MMD^2 comparison results (see <a href="multiple_comparison.html"><code>multiple_comparison()</code></a>),
 or a DataFrame with the same columns.</td>
 </tr>
 <tr class="even">
@@ -100,7 +97,7 @@ matrix. Default <code>True</code>.</td>
 </tr>
 <tr class="odd">
 <td><code>alpha</code></td>
-<td>Significance threshold used to decide which regions are linked.
+<td>Significance threshold used to decide which clusters are linked.
 Default <code>0.05</code>.</td>
 </tr>
 </tbody>
@@ -109,15 +106,15 @@ Default <code>0.05</code>.</td>
 <div class="section level2">
 <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a>
 </h2>
-<p>A region-by-region adjacency <code>DataFrame</code>. Regions
+<p>A cluster-by-cluster adjacency <code>DataFrame</code>. Clusters
 considered similar (repeated patterns) are connected with their observed
-MMD as the edge weight; regions found to be significantly different are
-left unconnected (<code>0</code>).</p>
+MMD^2 as the edge weight; clusters found to be significantly different
+are left unconnected (<code>0</code>).</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>matrix <span class="op">=</span> pairwise_results_to_matrix(adata)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>matrix <span class="op">=</span> pairwise_results_to_matrix(adata)</span></code></pre></div>
 <p><a href="index.html">← Back to reference index</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -1,10 +1,5 @@
 # spatial_silhouette_analysis()
 
-    spatial_silhouette_analysis(adata, n_neighbors_list, n_clusters_range, linkage="ward")
-
-Score combinations of neighborhood size and cluster count using a
-spatially-aware silhouette score.
-
 ## Description
 
 Runs a spatially-aware silhouette analysis over combinations of

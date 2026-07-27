@@ -53,8 +53,8 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="repspat">repSpat<a class="anchor" aria-label="anchor" href="#repspat"></a>
 </h1></div>
-<p>A Python package for detecting repeated spatial patterns in spatial omics data, defined as tissue regions that are spatially separated but share similar underlying cell-type or biological profile distributions. The package provides a nonparametric statistical inference framework that integrates spatially constrained clustering followed by spatial invariance testing between clusters using a block-permutation procedure based on the maximum mean discrepancy (MMD) statistic. This enables formal hypothesis testing for repeated spatial patterns. It also works natively with AnnData .h5ad files, the standard format for single-cell and spatial omics workflows, making it suitable for exploration and analysis of spatial omics datasets.</p>
-<p><code>repSpat</code> is currently available in GitHub as a python package. In this workshop we will be demonstrating functionalities of repspat in R using reticulate.</p>
+<p>This workshop demonstrates how to use the Python implementation of repSpat within R through the reticulate package. RepSpat detects repeated spatial patterns in spatial omics data, defined as spatially separated tissue regions with similar distributions of features, such as gene expression, cell types, binary markers, and other molecular or cellular measurements. The repSpat provides a nonparametric statistical inference framework based on spatially constrained clustering followed by multiple hypothesis testing between clusters using the Maximum Mean Discrepancy (MMD) squared statistic and a block-permutation procedure. This enables formal hypothesis testing for repeated spatial patterns. The Python implementation of repSpat accepts input data in the <a href="https://anndata.readthedocs.io/en/latest/index.html" class="external-link">AnnData</a> (.h5ad) format, a widely used data structure for single-cell and spatial omics analyses. For Bioconductor users, SpatialExperiment objects can be readily converted to AnnData format within R before analysis.</p>
+<p>The Python package is available on GitHub, and this workshop demonstrates how to use its functionality from R through the reticulate package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
 <span><span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_install.html" class="external-link">py_install</a></span><span class="op">(</span><span class="st">"git+https://github.com/amanpreet60/repspat.git"</span><span class="op">)</span></span>
@@ -64,12 +64,12 @@
 </h2>
 <p>By the end of this workshop, participants will be able to:</p>
 <ul>
-<li>Understand the goal of repeated spatial pattern detection.</li>
-<li>Apply constrained agglomerative hierarchical clustering (CAHC) to obtain spatially contiguous clusters.</li>
-<li>Perform pairwise comparisons of cluster distributions using the maximum mean discrepancy squared (MMD2) statistic.</li>
-<li>Approximate the null distribution of the MMD2 statistic using block permutation while preserving local dependence.</li>
-<li>Reassign cluster labels based on pairwise similarity.</li>
-<li>Interpret repeated spatial patterns and try the workflow with different data types.</li>
+<li>Understand the concept of repeated spatial patterns and their importance in spatial omics data.</li>
+<li>Apply constrained agglomerative hierarchical clustering (CAHC) to obtain partition tissue into spatially contiguous clusters.</li>
+<li>Test for spatial invariance between clusters using the MMD squared statistic</li>
+<li>Approximate the null distribution of the MMD<sup>2</sup> statistic using block permutation that preserves spatial dependence.</li>
+<li>Reassign cluster labels based on pairwise similarity to identify repeated spatial patterns.</li>
+<li>Apply the complete repSpat workflow to analyze spatial omics datasets and interpret the resulting repeated spatial patterns.</li>
 </ul>
 </div>
 <div class="section level2">
@@ -80,62 +80,47 @@
 <div class="section level2">
 <h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>
 </h2>
-<p>Participants should have:</p>
+<p>The following background is preferred but not required:</p>
 <ul>
 <li>Basic familiarity with R.</li>
 <li>Familiarity with spatial omics data eg. Visium, MIBI-TOF.</li>
-<li>Basic experience working with spatial experiment package.</li>
+<li>Basic experience working with SpatialExperiment object.</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="docker">Docker<a class="anchor" aria-label="anchor" href="#docker"></a>
 </h2>
-<p>This repository includes a Docker image for reproducing the workshop workflow.</p>
-<p>Follow these steps to run the workshop locally:</p>
+<p>This workshop can be run using the provided Docker image.</p>
+<p>Steps to run the workshop using Docker:</p>
 <ol style="list-style-type: decimal">
-<li>Open a terminal and go to the working directory where you want to run the workshop.</li>
+<li>Open a terminal and navigate to the directory where you would like to run the workshop.</li>
 </ol>
 <pre class="terminal"><code><span><span class="va">cd</span> <span class="op">/</span><span class="va">path</span><span class="op">/</span><span class="va">to</span><span class="op">/</span><span class="va">your</span><span class="op">/</span><span class="va">working</span><span class="op">/</span><span class="va">directory</span></span></code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Pull the workshop Docker image.</li>
 </ol>
-<pre class="text"><code>docker pull ghcr.io/amanpreet60/repspatworkshop:latest</code></pre>
+<pre class="text"><code>docker pull ghcr.io/amanpreet60/repspat_workshop:f433744</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Start the Docker container.</li>
 </ol>
-<pre class="terminal"><code>docker run \
-  -p 8787:8787 \
-  -e PASSWORD=bioc \
-  ghcr.io/amanpreet60/repspatworkshop:latest</code></pre>
+<pre class="terminal"><code>docker run -e PASSWORD=bioc -p 8787:8787 ghcr.io/amanpreet60/repspat_workshop:f433744</code></pre>
 <ol start="4" style="list-style-type: decimal">
-<li>Open RStudio in your browser.</li>
+<li>Open your web browser and visit:</li>
 </ol>
 <pre class="text"><code>http://localhost:8787</code></pre>
 <ol start="5" style="list-style-type: decimal">
-<li>Log in with the following credentials.</li>
+<li>Log in to RStudio using</li>
 </ol>
 <pre class="text"><code><span><span class="va">username</span><span class="op">:</span> <span class="va">rstudio</span></span>
 <span><span class="va">password</span><span class="op">:</span> <span class="va">bioc</span></span></code></pre>
 </div>
 <div class="section level2">
-<h2 id="required-r-packages">Required R Packages<a class="anchor" aria-label="anchor" href="#required-r-packages"></a>
-</h2>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"reticulate"</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">"BiocStyle"</span>,</span>
-<span>    <span class="st">"SpatialExperiment"</span>,</span>
-<span>    <span class="st">"SingleCellExperiment"</span>,</span>
-<span>    <span class="st">"SummarizedExperiment"</span></span>
-<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="vignettes">Vignettes<a class="anchor" aria-label="anchor" href="#vignettes"></a>
 </h2>
+<p>The workshop includes the following example analyses:</p>
 <p>MIBI-TOF spatial proteomics TNBC (Triple-Negative Breast Cancer)</p>
 <pre class="text"><code><span><span class="va">vignettes</span><span class="op">/</span><span class="va">tnbc_example.Rmd</span></span></code></pre>
-<p>MIBI-TOF spatial proteomics TNBC with threshold markers</p>
+<p>MIBI-TOF spatial proteomics TNBC with binary markers</p>
 <pre class="text"><code><span><span class="va">vignettes</span><span class="op">/</span><span class="va">tnbc_example_binary.Rmd</span></span></code></pre>
 <p>10x Visium spatial transcriptomics of mouse brain</p>
 <pre class="text"><code><span><span class="va">vignettes</span><span class="op">/</span><span class="va">mouse_example.Rmd</span></span></code></pre>
@@ -144,7 +129,7 @@
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <ol style="list-style-type: decimal">
-<li><p>Senanayake, R. &amp; Jeganathan, P. (2025). A Robust Nonparametric Framework for Detecting Repeated Spatial Patterns. arXiv:2506.14103. <a href="https://arxiv.org/html/2506.14103" class="external-link uri">https://arxiv.org/html/2506.14103</a></p></li>
+<li><p>Senanayake, R. &amp; Jeganathan, P. (2026). A Robust Nonparametric Framework for Detecting Repeated Spatial Patterns. Spatial Statistics, 101025. <a href="https://doi.org/10.1016/j.spasta.2026.101025" class="external-link uri">https://doi.org/10.1016/j.spasta.2026.101025</a></p></li>
 <li><p>González-Almagro, G., Peralta, D., De Poorter, E., Cano, J.-R., &amp; García, S. (2023). Semi-Supervised Constrained Clustering: An In-Depth Overview, Ranked Taxonomy and Future Research Directions. arXiv:2303.00522. <a href="https://arxiv.org/abs/2303.00522" class="external-link uri">https://arxiv.org/abs/2303.00522</a></p></li>
 <li><p>Keren, L., Bosse, M., Marquez, D., et al. (2018). A Structured Tumor-Immune Microenvironment in Triple Negative Breast Cancer (TNBC) Revealed by Multiplexed Ion Beam Imaging. <em>Cell</em>, 174(6), 1373-1387. <a href="https://www.cell.com/fulltext/S0092-8674(18)31100-0" class="external-link uri">https://www.cell.com/fulltext/S0092-8674(18)31100-0</a></p></li>
 <li><p>10x Genomics. Visium spatial gene expression, mouse coronal brain section. Distributed via the Bioconductor <code>STexampleData</code> package. <a href="https://bioconductor.org/packages/STexampleData" class="external-link uri">https://bioconductor.org/packages/STexampleData</a></p></li>

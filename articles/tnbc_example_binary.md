@@ -94,10 +94,10 @@ cat("\nDistance matrix: first 5 cells x first 5 cells\n")
 print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 ```
 
-## Select Spatial Region Settings
+## Select Clustering Parameters
 
-We test combinations of neighborhood size and region count and score
-each with the custom silhouette score.
+We test combinations of neighborhood size and cluster count and score
+each with the spatial silhouette score.
 
 ``` r
 
@@ -112,10 +112,10 @@ py_get_item(data$uns, "silhouette_scores")
 
 We proceed with `n_neighbors = 8` and `n_clusters = 7`.
 
-## Divide the Tissue Into Spatial Regions
+## Construct Spatially Constrained Clusters
 
-We apply spatially constrained hierarchical clustering with the chosen
-settings.
+We apply constrained agglomerative hierarchical clustering (CAHC) with
+the chosen parameters.
 
 ``` r
 
@@ -128,7 +128,7 @@ cat("\n--------------------\n\n")
 py_get_item(data$obs, "labels")
 ```
 
-## Visualize the Spatial Regions
+## Visualize the Spatially Constrained Clusters
 
 ``` r
 
@@ -143,10 +143,10 @@ plt$subplots_adjust(right = 0.72)
 plt$show()
 ```
 
-## Visualize Features Across Regions
+## Visualize Features Across Clusters
 
 For binary data, this shows the features most frequently present in each
-region.
+cluster.
 
 ``` r
 
@@ -167,9 +167,9 @@ for (fig_axes in reticulate::iterate(feature_plots$values())) {
 }
 ```
 
-## Create Permutation Blocks
+## Create blocks for permutation
 
-We group cells into blocks within each region so permutation happens at
+We group cells into blocks within each cluster so permutation happens at
 the block level.
 
 ``` r
@@ -183,10 +183,11 @@ cat("\n--------------------\n\n")
 py_get_item(data$obs, "repspat_block_id")
 ```
 
-## Compare Region Pairs
+## Test Spatial Invariance Between Clusters
 
-We compare every pair of regions with MMD, using the `"IMQ"` kernel, 200
-block permutations, and Benjamini–Hochberg correction.
+We compare every pair of clusters with the MMD^2 statistic, using the
+`"IMQ"` kernel, 200 block permutations, and Benjamini–Hochberg
+correction.
 
 ``` r
 
@@ -201,9 +202,9 @@ cat("\n--------------------\n\n")
 py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = list("null_dist")))
 ```
 
-## Visualize Which Regions Are Not Significantly Different
+## Visualize Repeated Spatial Patterns
 
-Region pairs with `adj_p >= 0.05` are repeated spatial patterns and are
+Cluster pairs with `adj_p >= 0.05` are repeated spatial patterns and are
 drawn as a network.
 
 ``` r
@@ -216,21 +217,21 @@ similarity_matrix <- py_to_r(repspat$pairwise_results_to_matrix(
 similarity_matrix
 ```
 
-## Merge Regions Into Repeated Spatial Patterns
+## Relabel Repeated Spatial Patterns
 
-We merge the region labels that could not be statistically distinguished
-into a single shared label.
+We relabel the clusters that could not be statistically distinguished
+with a single shared label.
 
 ``` r
 
-clusters_to_merge <- c(3, 5, 6)   # edit: region labels you want merged
+clusters_to_merge <- c(3, 5, 6)   # edit: select labels to reassign
 new_label <- min(clusters_to_merge)
 labels <- py_to_r(py_get_item(adata$obs, "labels"))
 labels[labels %in% clusters_to_merge] <- new_label
 py_set_item(adata$obs, "updated_labels", as.integer(labels))
 ```
 
-## Visualize the Merged Regions
+## Visualize the Relabeled Repeated Spatial Patterns
 
 ``` r
 
@@ -248,7 +249,7 @@ plt$show()
 ## Conclusion
 
 Applied to the TNBC sample using binary marker profiles and the Jaccard
-metric, `repSpat` recovered repeated patterns among the clustered
-regions. As with the continuous version, repeated patterns are best
-interpreted alongside region size, location, and biological context
-rather than the test result in isolation.
+metric, `repSpat` recovered repeated patterns among the clusters. As
+with the continuous version, repeated patterns are best interpreted
+alongside cluster size, location, and biological context rather than the
+test result in isolation.

@@ -1,9 +1,5 @@
 # compute_distances()
 
-    compute_distances(adata, layer, metric, distance_key="repspat_distances")
-
-Compute pairwise feature distances from a required AnnData layer.
-
 ## Description
 
 Computes pairwise distances from the required AnnData layer, stores them

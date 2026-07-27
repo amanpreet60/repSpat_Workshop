@@ -1,15 +1,10 @@
 # repSpat
 
-A Python package for detecting repeated spatial patterns in spatial omics data, defined as tissue regions that 
-are spatially separated but share similar underlying cell-type or biological profile distributions. 
-The package provides a nonparametric statistical inference framework that integrates spatially constrained 
-clustering followed by spatial invariance testing between clusters using a block-permutation procedure based on 
-the maximum mean discrepancy (MMD) statistic. This enables formal hypothesis testing for repeated spatial patterns. 
-It also works natively with AnnData .h5ad files, the standard format for single-cell and spatial omics workflows, 
-making it suitable for exploration and analysis of spatial omics datasets.
+This workshop demonstrates how to use the Python implementation of repSpat within R through the reticulate package. RepSpat detects repeated spatial patterns in spatial omics data, defined as spatially separated tissue regions with similar distributions of features, such as gene expression, cell types, binary markers, and other molecular or cellular measurements.
+The repSpat provides a nonparametric statistical inference framework based on spatially constrained clustering followed by multiple hypothesis testing between clusters using the Maximum Mean Discrepancy (MMD) squared statistic and a block-permutation procedure. This enables formal hypothesis testing for repeated spatial patterns. 
+The Python implementation of repSpat accepts input data in the [AnnData](https://anndata.readthedocs.io/en/latest/index.html) (.h5ad) format, a widely used data structure for single-cell and spatial omics analyses. For Bioconductor users, SpatialExperiment objects can be readily converted to AnnData format within R before analysis.
 
-`repSpat` is currently available in GitHub as a python package.
-In this workshop we will be demonstrating functionalities of repspat in R using reticulate.
+The Python package is available on GitHub, and this workshop demonstrates how to use its functionality from R through the reticulate package.
 
 ```r
 library(reticulate)
@@ -21,12 +16,12 @@ repspat <- import("repspat", convert = FALSE)
 
 By the end of this workshop, participants will be able to:
 
-- Understand the goal of repeated spatial pattern detection.
-- Apply constrained agglomerative hierarchical clustering (CAHC) to obtain spatially contiguous clusters.
-- Perform pairwise comparisons of cluster distributions using the maximum mean discrepancy squared (MMD2) statistic.
-- Approximate the null distribution of the MMD2 statistic using block permutation while preserving local dependence.
-- Reassign cluster labels based on pairwise similarity.
-- Interpret repeated spatial patterns and try the workflow with different data types.
+- Understand the concept of repeated spatial patterns and their importance in spatial omics data.
+- Apply constrained agglomerative hierarchical clustering (CAHC) to obtain partition tissue into spatially contiguous clusters.
+- Test for spatial invariance between clusters using the MMD squared statistic
+- Approximate the null distribution of the MMD<sup>2</sup> statistic using block permutation that preserves spatial dependence.
+- Reassign cluster labels based on pairwise similarity to identify repeated spatial patterns.
+- Apply the complete repSpat workflow to analyze spatial omics datasets and interpret the resulting repeated spatial patterns.
 
 ## Workshop Length
 
@@ -34,19 +29,19 @@ By the end of this workshop, participants will be able to:
 
 ## Prerequisites
 
-Participants should have:
+The following background is preferred but not required:
 
 - Basic familiarity with R.
 - Familiarity with spatial omics data eg. Visium, MIBI-TOF.
-- Basic experience working with spatial experiment package.
+- Basic experience working with SpatialExperiment object.
 
 ## Docker
 
-This repository includes a Docker image for reproducing the workshop workflow.
+This workshop can be run using the provided Docker image.
 
-Follow these steps to run the workshop locally:
+Steps to run the workshop using Docker:
 
-1. Open a terminal and go to the working directory where you want to run the workshop.
+1. Open a terminal and navigate to the directory where you would like to run the workshop.
 
 ```terminal
 cd /path/to/your/working/directory
@@ -55,45 +50,31 @@ cd /path/to/your/working/directory
 2. Pull the workshop Docker image.
 
 ```text
-docker pull ghcr.io/amanpreet60/repspatworkshop:latest
+docker pull ghcr.io/amanpreet60/repspat_workshop:f433744
 ```
 
 3. Start the Docker container.
 
 ```terminal
-docker run \
-  -p 8787:8787 \
-  -e PASSWORD=bioc \
-  ghcr.io/amanpreet60/repspatworkshop:latest
+docker run -e PASSWORD=bioc -p 8787:8787 ghcr.io/amanpreet60/repspat_workshop:f433744
 ```
 
-4. Open RStudio in your browser.
+4. Open your web browser and visit:
 
 ```text
 http://localhost:8787
 ```
 
-5. Log in with the following credentials.
+5. Log in to RStudio using
 
 ```text
 username: rstudio
 password: bioc
 ```
 
-## Required R Packages
-
-```r
-install.packages(c("reticulate"))
-
-BiocManager::install(c(
-    "BiocStyle",
-    "SpatialExperiment",
-    "SingleCellExperiment",
-    "SummarizedExperiment"
-))
-```
-
 ## Vignettes
+
+The workshop includes the following example analyses:
 
 MIBI-TOF spatial proteomics TNBC (Triple-Negative Breast Cancer)
 
@@ -101,7 +82,7 @@ MIBI-TOF spatial proteomics TNBC (Triple-Negative Breast Cancer)
 vignettes/tnbc_example.Rmd
 ```
 
-MIBI-TOF spatial proteomics TNBC with threshold markers
+MIBI-TOF spatial proteomics TNBC with binary markers
 
 ```text
 vignettes/tnbc_example_binary.Rmd
@@ -115,7 +96,7 @@ vignettes/mouse_example.Rmd
 
 ## References
 
-1. Senanayake, R. & Jeganathan, P. (2025). A Robust Nonparametric Framework for Detecting Repeated Spatial Patterns. arXiv:2506.14103. https://arxiv.org/html/2506.14103
+1. Senanayake, R. & Jeganathan, P. (2026). A Robust Nonparametric Framework for Detecting Repeated Spatial Patterns. Spatial Statistics, 101025. https://doi.org/10.1016/j.spasta.2026.101025
 
 2. González-Almagro, G., Peralta, D., De Poorter, E., Cano, J.-R., & García, S. (2023). Semi-Supervised Constrained Clustering: An In-Depth Overview, Ranked Taxonomy and Future Research Directions. arXiv:2303.00522. https://arxiv.org/abs/2303.00522
 

@@ -12,12 +12,12 @@ vignette: >
 | --- | --- |
 | [`compute_distances()`](compute_distances.html) | Compute pairwise feature distances from a required AnnData layer. |
 | [`spatial_silhouette_analysis()`](spatial_silhouette_analysis.html) | Score combinations of neighborhood size and cluster count using a spatially-aware silhouette score. |
-| [`spatial_constrained_hac()`](spatial_constrained_hac.html) | Divide a tissue sample into spatial regions with spatially constrained hierarchical clustering. |
-| [`create_blocks()`](create_blocks.html) | Create permutation blocks within each region for block-based testing. |
-| [`multiple_comparison()`](multiple_comparison.html) | Pairwise MMD comparison between all regions, with multiple-testing correction. |
-| [`plot_spatial_clusters()`](plot_spatial_clusters.html) | Plot the tissue colored by assigned region labels. |
-| [`plot_cluster_feature_presence()`](plot_cluster_feature_presence.html) | Plot each region alongside its most defining features. |
-| [`pairwise_results_to_matrix()`](pairwise_results_to_matrix.html) | Build a region similarity matrix and network plot from MMD results. |
+| [`spatial_constrained_hac()`](spatial_constrained_hac.html) | Partition a tissue sample into spatially constrained clusters with constrained agglomerative hierarchical clustering. |
+| [`create_blocks()`](create_blocks.html) | Create permutation blocks within each cluster for block-based testing. |
+| [`multiple_comparison()`](multiple_comparison.html) | Pairwise MMD^2 comparison between all clusters, with multiple-testing correction. |
+| [`plot_spatial_clusters()`](plot_spatial_clusters.html) | Plot the tissue colored by assigned cluster labels. |
+| [`plot_cluster_feature_presence()`](plot_cluster_feature_presence.html) | Plot each cluster alongside its most defining features. |
+| [`pairwise_results_to_matrix()`](pairwise_results_to_matrix.html) | Build a cluster similarity matrix and network plot from MMD^2 results. |
 
 All user-facing `repspat` functions, called from R via `reticulate` in the workshop vignettes.
 

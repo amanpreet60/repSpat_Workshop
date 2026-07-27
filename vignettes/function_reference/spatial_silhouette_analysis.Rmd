@@ -8,12 +8,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```
-spatial_silhouette_analysis(adata, n_neighbors_list, n_clusters_range, linkage="ward")
-```
-
-Score combinations of neighborhood size and cluster count using a spatially-aware silhouette score.
-
 ## Description
 
 Runs a spatially-aware silhouette analysis over combinations of k-nearest spatial neighbors and cluster counts. For each combination, cells are clustered with spatially constrained hierarchical clustering, then a silhouette-like score is computed comparing each cell to its own cluster and to spatially adjacent clusters only. Stores a DataFrame of scores in `adata.uns["silhouette_scores"]` and returns the same `adata`.

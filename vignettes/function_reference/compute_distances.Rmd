@@ -8,12 +8,6 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```
-compute_distances(adata, layer, metric, distance_key="repspat_distances")
-```
-
-Compute pairwise feature distances from a required AnnData layer.
-
 ## Description
 
 Computes pairwise distances from the required AnnData layer, stores them in `adata.obsp[distance_key]`, records the active feature layer in `adata.uns["repspat"]["layer"]`, and returns the same `adata`.

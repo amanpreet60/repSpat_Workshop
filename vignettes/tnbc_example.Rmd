@@ -15,23 +15,23 @@ params:
 
 # Introduction
 
-Spatial omics data tells us both **what is present in a tissue** and **where it is located**. Sometimes, two areas that are far apart contain similar cells or biological features. These areas may represent a repeated spatial pattern. In this notebook, we will use `repSpat` to find and compare these repeated spatial patterns in a TNBC dataset.
+MIBI-TOF (Multiplexed Ion Beam Imaging by Time-of-Flight) is a spatial proteomics technology that measures the expression of dozens of protein markers while preserving their spatial locations within tissue. In tumors such as triple-negative breast cancer (TNBC), the tumor microenvironment consists of diverse cell populations that interact to form distinct spatial organizations. Similar cellular neighborhoods or microenvironments may occur in multiple, spatially separated regions of the same tissue, giving rise to repeated spatial patterns. In this vignette, we use repSpat to identify and compare repeated spatial patterns in a TNBC MIBI-TOF dataset.
 
 The workflow uses five main package components:
 
 - `compute_distances()` computes pairwise feature distances from a selected AnnData layer.
-- `spatial_silhouette_analysis()` compares combinations of k-nearest neighbors and cluster counts.
-- `spatial_constrained_hac()` performs hierarchical aglomerative clustering based on the k and number of clusters.
-- `create_blocks()` creates smaller spatial groups within each region for block-based permutation testing.
-- `multiple_comparison()` compares pairs of regions to identify similar or distinct spatial patterns.
+- `spatial_silhouette_analysis()` evaluates combinations of the number of nearest neighbors and the number of clusters to guide the selection of constrained clustering parameters.
+- `spatial_constrained_hac()` performs constrained agglomerative hierarchical clustering using the selected parameters.
+- `create_blocks()` partitions each cluster into smaller blocks for block-permutation testing
+- `multiple_comparison()` performs pairwise hypothesis tests between clusters to identify repeated spatial patterns using the Maximum Mean Discrepancy squared statistic and a block-permutation procedure
 
-At the end, we identify region pairs for which the analysis does not find strong evidence of a difference. These pairs are repeated spatial patterns.
+At the end of the workflow, clusters that are not found to differ significantly are grouped together as repeated spatial patterns.
 
-We will introduce one component at a time, explain its inputs and outputs, run it, and inspect the result before continuing.
+In this vignette, we introduce each function in turn, describe its inputs and outputs, demonstrate its use, and examine the resulting output before proceeding to the next step.
 
 # Load libraries
 
-We first load the R packages needed to format the notebook, work with spatial omics data, and call the Python `repSpat` package from R.
+We first load the R packages required for the workshop. These packages provide tools for working with spatial omics data and for calling the Python implementation of repSpat  from within R using the reticulate package.
 
 ```{r setup, message=FALSE, warning=FALSE}
 library(BiocStyle)
@@ -39,7 +39,7 @@ library(SpatialExperiment)
 library(reticulate)
 ```
 
-This code imports the Python packages needed for the analysis: `anndata` for working with AnnData objects and `repspat` for detecting repeated spatial patterns.
+Next, we import the Python packages used in the analysis: anndata for working with AnnData objects and repspat for detecting repeated spatial patterns.
 
 ```{r import-package, eval=exists("params") && isTRUE(params$run_analysis), message=FALSE, warning=FALSE}
 anndata <- import("anndata", convert = FALSE)
@@ -48,16 +48,14 @@ repspat <- import("repspat", convert = FALSE)
 
 # Prepare the Sample
 
-Before using `repSpat`, we first preprocess the TNBC dataset. We start with the `.rds` file, convert it into an AnnData object, and then select one tissue sample for analysis.
+Before running `repSpat`, we preprocess the TNBC MIBI-TOF dataset. The original dataset is stored as an R SpatialExperiment object (.rds) containing multiple tissue samples. Since each sample represents an independent tissue section with its own spatial layout, the analysis is performed one sample at a time.
 
-The original dataset contains multiple samples, but each sample represents a separate tissue layout. We therefore analyze one sample at a time.
+In this section, we:
 
-In this step, we:
-
-- import the TNBC `.rds` file,
-- extract the marker measurements, cell metadata, and spatial coordinates,
-- create an AnnData object from these data,
-- select `Sample_04` for the analysis.
+- load the SpatialExperiment object from the `.rds` file,
+- extract the marker measurements, cell information, and spatial coordinates,
+- convert the selected sample into an AnnData object,
+- save the AnnData object as an .h5ad file for use with the Python implementation of repSpat.
 
 ```{r create-h5ad-file, eval=FALSE}
 rds_path <- "../inst/extdata/03_TNBC_2018_spe.rds"
@@ -87,19 +85,17 @@ adata$write_h5ad(h5ad_path)
 adata
 ```
 
-The result of this preprocessing step is an AnnData object containing only `Sample_04`. This prepared object is then used as the input for the `repSpat` workflow.
+The resulting AnnData object contains the selected tissue sample (`Sample_04`) and serves as the input to the repSpat workflow.
 
 # Compute Feature Distances
 
-Before dividing the tissue into regions, we first select `Sample_04` from the full dataset and compute pairwise feature distances between its cells.
+The first step of the repSpat workflow computes pairwise feature distances between cells based on their marker profiles. These distances quantify the similarity between cells and are used in subsequent steps to construct spatially constrained clusters.
 
-This step measures how similar or different cells are based on their marker profiles, storing the result as a distance matrix that later steps use to build spatial regions.
+The function takes the following inputs:
 
-The inputs are:
-
-- `adata`: the AnnData object, filtered to `Sample_04`.
+- `adata`: the AnnData object containing `Sample_04`.
 - `layer = "layer 1"`: the feature matrix used to compute distances.
-- `metric = "euclidean"`: the distance metric applied between cells.
+- `metric = "euclidean"`: the distance metric used to compare cells.
 
 ```{r compute-distances, eval=exists("params") && isTRUE(params$run_analysis)}
 py$adata <- adata
@@ -113,16 +109,9 @@ adata <- repspat$compute_distances(
 adata$obs$sample_id$unique()
 ```
 
-The resulting `adata` object contains the selected `Sample_04` data in AnnData format.
+After computing the distances, the resulting distance matrix is stored in adata$uns["repspat_distances"] for use in the clustering step. The feature matrix (layers["layer 1"]), spatial coordinates (obsm["spatial"]), and cell information (obs) remain unchanged.
 
-The result includes:
-
-- `layers["layer 1"]`: the main feature matrix.
-- `obsm["spatial"]`: the spatial coordinates.
-- `obs`: the cell metadata, including the sample labels and cell-type labels.
-- `uns["repspat_distances"]`: the feature-based distance matrix computed by `repspat$compute_distances`.
-
-We can check the size of each part:
+We can verify that the data have been loaded correctly and inspect the main components of the AnnData object before proceeding.
 
 ```{r inspect-adata-parts, eval=exists("params") && isTRUE(params$run_analysis)}
 cat("Feature matrix: first 5 cells\n")
@@ -135,22 +124,21 @@ cat("\nDistance matrix: first 5 cells x first 5 cells\n")
 print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 ```
 
-This confirms that the sample was loaded and its main inputs were prepared successfully.
-The distances are now stored in `adata`, ready to guide the choice of spatial region settings.
+This confirms that the data have been prepared successfully and that the pairwise feature distances have been computed. The resulting distance matrix will be used to construct spatially constrained clusters in the next step.
 
-# Select Spatial Region Settings
+# Select Clustering Parameters
 
-Before dividing the tissue into regions, we need to choose two settings and test which combination works best.
+Before partitioning the tissue into spatially constrained clusters, we first select appropriate clustering parameters. Specifically, we choose the number of nearest neighbors used to define local spatial connectivity and the number of clusters used to partition the tissue.
 
-The analysis tests different combinations of neighborhood size and region count and gives each combination a silhouette score. Higher scores indicate better separation between spatial regions. The custom silhouette score compares each cell with its own cluster and with spatially neighboring clusters only. This makes the score focus on how well nearby tissue regions are separated.
+To guide this selection, the workflow evaluates combinations of these parameters using a spatial silhouette score. Unlike the classical silhouette score, the spatial silhouette score compares each cell with its own cluster and only neighboring clusters, providing a measure of cluster separation that accounts for the spatial organization of the tissue. Higher scores indicate better-separated spatially constrained clusters.
 
-The ranges tested here can be adjusted based on the dataset and in collaboration with domain experts who understand the tissue structure and expected biological patterns.
+The candidate values can be adjusted according to the characteristics of the dataset and informed by domain knowledge regarding the tissue architecture.
 
-The inputs are:
+The function takes the following inputs:
 
-- `adata`: the AnnData object with feature distances already computed.
-- `n_neighbors_list = [6, 8]`: how many nearby cells are used to define local spatial neighborhoods.
-- `n_clusters_range = 4:8`: how many spatial regions we want to create.
+- `adata`: the AnnData object containing the precomputed pairwise feature distances.
+- `n_neighbors_list = [6, 8]`: candidate numbers of nearest neighbors used to define the spatial connectivity graph.
+- `n_clusters_range = 4:8`: candidate numbers of  clusters.
 
 
 ```{r silhouette-analysis, eval=exists("params") && isTRUE(params$run_analysis)}
@@ -163,22 +151,19 @@ cat("\n--------------------\n\n")
 py_get_item(data$uns, "silhouette_scores")
 ```
 
-The highest silhouette score is observed for `n_neighbors = 8` and `n_clusters = 4`, suggesting this setting gives the clearest separation among the tested options.
+The highest spatial silhouette score is obtained for n_neighbors = 8 and n_clusters = 4, indicating the best cluster separation among the parameter combinations evaluated. The combination n_neighbors = 8 and n_clusters = 7 also achieves a comparable score.
 
-The setting `n_neighbors = 8` and `n_clusters = 7` is also close, so the final choice can consider both the score and biological interpretability.
-With `n_neighbors = 8` and `n_clusters = 7` selected, the data is now ready for spatial region clustering.
+Therefore, the final choice should consider both the spatial silhouette score and the biological interpretability of the resulting clusters. In this workshop, we proceed with n_neighbors = 8 and n_clusters = 7 for the subsequent clustering analysis.
 
-# Divide the Tissue Into Spatial Regions
+# Construct Spatially Constrained Clusters
 
-After choosing the clustering settings from previous function, we finally divide the tissue into spatial regions.
+After selecting the clustering parameters, we partition the tissue into spatially constrained clusters using constrained agglomerative hierarchical clustering (CAHC). Cells are grouped according to the similarity of their feature profiles while enforcing spatial connectivity through the neighborhood graph. As a result, cells are merged only if they are connected through nearby cells, producing spatially contiguous clusters.
 
-This step uses spatially constrained hierarchical clustering to create tissue regions. Cells are grouped based on their marker profiles, but the clustering is restricted by the spatial neighborhood graph. This means cells can be grouped together only when they are connected through nearby cells in the tissue, helping the regions remain spatially coherent.
-
-The inputs are:
+The function takes the following inputs:
 
 - `adata`: the AnnData object.
-- `n_clusters = 7`: the number of spatial regions to create.
-- `n_neighs = 8`: the number of nearby cells used to define local neighborhoods.
+- `n_clusters = 7`: the number of clusters to construct.
+- `n_neighs = 8`: the number of nearest neighbors used to define the spatial connectivity graph.
 
 ```{r clustering, eval=exists("params") && isTRUE(params$run_analysis)}
 adata <- repspat$spatial_constrained_hac(
@@ -190,12 +175,13 @@ cat("\n--------------------\n\n")
 py_get_item(data$obs, "labels")
 ```
 
-The function returns the updated AnnData object, with the assigned region number for every cell stored in `adata.obs["labels"]`.
-The data is now ready to be visualized and grouped into blocks for comparison.
+The function returns an updated AnnData object with the cluster assignment for each cell stored in adata.obs["labels"]. These spatially constrained clusters are used in the subsequent steps for block construction and hypothesis testing.
 
-# Visualize the Spatial Regions
+# Visualize the Spatially Constrained Clusters
 
-Now that each cell has an assigned region, we can plot the tissue colored by region to check that the regions look spatially coherent. The coordinates and region labels are stored in `adata`, so they can also be pulled out directly to build your own custom visualizations or analyses.
+After assigning each cell to a spatially constrained cluster, we visualize the tissue using the cluster labels. This provides a simple way to assess whether the resulting clusters are spatially contiguous and consistent with the tissue structure.  
+
+The spatial coordinates and cluster labels are stored in the AnnData object and can also be extracted to create customized visualizations or conduct additional analyses.
 
 ```{r plot-spatial-regions, eval=exists("params") && isTRUE(params$run_analysis), out.width="100%"}
 plt <- reticulate::import("matplotlib.pyplot")
@@ -209,21 +195,20 @@ plt$subplots_adjust(right = 0.72)
 plt$show()
 ```
 
-This gives us a simple check of how the sample was divided before continuing.
-The data is now ready for block based comparison, once grouped into blocks in the next step.
+The resulting plot shows the spatial distribution of the seven clusters across the tissue. After inspecting the clustering result, we proceed to partition each cluster into blocks for block-permutation testing.
 
-# Visualize Features Across Regions
+# Visualize Features Across Clusters
 
-The region labels tell us how the tissue was partitioned, but not what makes each region distinct. This function plots each region alongside its most defining features: if the data has binary features, it shows the features most frequently present in that region; otherwise, it shows the numeric features most enriched in that region compared to the rest of the tissue.
+The spatially constrained clusters show how the tissue has been partitioned, but they do not explain what distinguishes each cluster. This function visualizes the features that are most characteristic of each cluster. For binary features, it displays the features with the highest prevalence within each cluster. For continuous features, it displays the features that are most enriched relative to the remaining tissue.
 
-The inputs are:
+The function takes the following inputs:
 
-- `adata`: the sample containing the region labels.
-- `label_key = "labels"`: the column identifying each cell's assigned region.
-- `top_n = 10`: the number of top features to display per region.
-- `figsize`: the size of each region's plot.
-- `point_size`: the size of the spatial scatter points.
-- `alpha`: the transparency of the spatial scatter points.
+- `adata`: the AnnData object containing the cluster labels.
+- `label_key = "labels"`: the column containing the cluster assignment for each cell.
+- `top_n = 10`: the number of top features to display for each cluster.
+- `figsize`: the size of each cluster in the plot
+- `point_size`: the size of the points in the plot.
+- `alpha`: the transparency of the plotted points.
 
 ```{r plot-features, eval=exists("params") && isTRUE(params$run_analysis)}
 plt <- reticulate::import("matplotlib.pyplot")
@@ -243,16 +228,16 @@ for (fig_axes in reticulate::iterate(feature_plots$values())) {
 }
 ```
 
-The function returns a dictionary mapping each region's cluster ID to its `(figure, axes)` pair, which we loop through below to display every region's plot.
+The function returns a dictionary mapping each cluster to its corresponding (figure, axes) pair. The code below iterates through these figures and displays the feature plots for all clusters.
 
-# Create Permutation Blocks
+# Create blocks for permutation
 
-Cells within the same spatial region tend to look similar to their neighbors, so they shouldn't be treated as fully independent observations during permutation testing. To account for this, we group cells into smaller blocks within each region and permute at the block level instead of the individual-cell level.
+Permutation tests assume that observations are exchangeable under the null hypothesis. However, cells within a spatially constrained cluster often exhibit local spatial dependence and therefore cannot be treated as independent observations. To account for this dependence, repSpat partitions each cluster into smaller blocks and performs permutations at the block level rather than the individual-cell level.
 
-The inputs are:
+The function takes the following inputs:
 
-- `adata`: the sample with region labels assigned in the previous step.
-- `knn = 8`: the approximate number of cells per block, matching the neighborhood size used earlier. This keeps nearby cells grouped together while still splitting larger regions into several blocks.
+- `adata`: the AnnData object containing the cluster assignments.
+- `knn = 8`: the approximate number of cells per block, matching the neighborhood size used during clustering. This keeps nearby cells grouped together while allowing larger clusters to be partitioned into multiple blocks.
 
 ```{r build-blocks, eval=exists("params") && isTRUE(params$run_analysis)}
 adata <- repspat$create_blocks(
@@ -264,29 +249,28 @@ cat("\n--------------------\n\n")
 py_get_item(data$obs, "repspat_block_id")
 ```
 
-The function returns the updated AnnData object, with the block assignment for every cell stored in `adata.obs["repspat_block_id"]`
-The data is now ready for block-based comparison between spatial regions.
+The function returns an updated AnnData object with the block assignment for each cell stored in adata.obs["repspat_block_id"]. These block assignments are then used in the block-permutation procedure to perform hypothesis tests between clusters.
 
-# Compare Region Pairs
+# Test Spatial Invariance Between Clusters
 
-The tissue has now been divided into regions and blocks, but we still need to determine which regions have similar biological profiles.
+The tissue has now been partitioned into spatially constrained clusters, and each cluster has been divided into permutation blocks. The next step is to compare the feature distributions of all cluster pairs and determine which pairs show evidence of difference in distribution
 
-- **Null hypothesis (H0):** the two regions come from the same underlying feature distribution. Any observed difference is due to chance, so the regions are spatially invariant and can be treated as a repeated spatial pattern.
-- **Alternative hypothesis (H1):** the two regions come from different feature distributions, meaning they are biologically distinct.
+- **Null hypothesis (H0):** the two clusters have the same underlying feature distribution.
+- **Alternative hypothesis (H1):** the two clusters have different feature distributions.
 
-To check whether two regions are similar, we need a way to compare their feature profiles. A simple option would be to compare their means or variances, but MMD does this more reliably: instead of reducing each region to a single summary number, it compares the full shape of the two distributions, so it can pick up differences in shape, spread, and structure that a mean or variance comparison would miss.
+Failure to reject the null hypothesis indicates that the analysis does not find sufficient evidence of a difference between the two cluster distributions. Such cluster pairs are treated as candidate repeated spatial patterns. In contrast, rejection of the null hypothesis provides evidence that the clusters have different feature distributions.
 
-MMD tells us how different two regions' feature profiles are, as a single number:
+The observed MMD^2 value measures the discrepancy between the feature distributions of two clusters:
 
-- Low MMD: the regions look similar.
-- High MMD: the regions look different.
+- A smaller MMD^2 value indicates greater similarity between the distributions.
+- A larger MMD^2 value indicates greater dissimilarity between the distributions.
 
-The inputs are:
+The function takes the following inputs:
 
-- `adata`: the selected sample containing distances, regions, and blocks.
-- `kernel`: the rule used to convert distances into similarities. `repSpat` supports `"IMQ"` and `"Gaussian"`. Both give higher similarity to cells with more similar feature profiles — `"IMQ"` decreases similarity gradually as distance increases, while `"Gaussian"` decreases it more quickly and emphasizes very close profiles. Here, we use `"IMQ"`.
-- `nperm`: the number of block permutations used to build the chance-based reference distribution. We use 200; more permutations give a more stable estimate but take longer to run.
-- `adj_p`: the method used to correct p-values when testing many region pairs. We use the Benjamini–Hochberg method (`"BH"`), which limits false discoveries across all the pairwise tests.
+- `adata`: the AnnData object containing the feature data, cluster assignments, and permutation-block assignments.
+- `kernel`: the kernel used to compare feature distributions. repSpat supports "IMQ" and "Gaussian" kernels. Both assign greater similarity to cells with similar feature profiles. The inverse multiquadric ("IMQ") kernel decreases more gradually as feature distance increases, whereas the Gaussian kernel decreases more rapidly. In this example, we use "IMQ".
+- `nperm`: the number of block permutations used to approximate the null distribution of the MMD^2 statistic. Increasing the number of permutations generally produces more stable p-value estimates but requires additional computation.
+- `adj_p = "BH"`: the method used to adjust p-values for the multiple pairwise tests. The Benjamini–Hochberg ("BH") procedure is used here to control the false discovery rate.
 
 ```{r mmd-results, eval=exists("params") && isTRUE(params$run_analysis)}
 adata <- repspat$multiple_comparison(
@@ -300,22 +284,24 @@ cat("\n--------------------\n\n")
 py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = list("null_dist")))
 ```
 
-The results includes:
+The results are stored in adata$uns["repspat_mmd_results"] and include:
 
-- `region_1` and `region_2`: the regions being compared.
-- `obs_mmd_sq`: the observed MMD difference.
-- `p_value`: the unadjusted permutation p-value.
-- `adj_p`: the p-value after correcting for multiple comparisons (here, using the Benjamini–Hochberg false discovery rate method).
+- `region_1` and `region_2`: the pair of clusters being compared.
+- `obs_mmd_sq`: the observed MMD^2 statistic.
+- `p_value`: the unadjusted p-value.
+- `adj_p`: the p-value adjusted for multiple comparisons using the selected procedure.
 
-# Visualize Which Regions Are Not Significantly Different
+# Visualize Repeated Spatial Patterns
 
-Region pairs where we couldn't reject the null hypothesis (`adj_p >= 0.05`) are our repeated spatial patterns, regions that can't be clearly distinguished from each other. This function draws those pairs as a network, connecting regions that are similar and labeling each connection with its observed MMD.
+The pairwise hypothesis tests identify cluster pairs that do not show evidence of different feature distributions. Using the Benjamini–Hochberg procedure with a false discovery rate (FDR) threshold of 0.05, cluster pairs with adj_p ≥ 0.05 are treated as candidate repeated spatial patterns.
 
-The inputs are:
+This function visualizes these relationships as a network. Each node represents a cluster, and an edge connects two clusters that are not significantly different. The edge is labeled with the corresponding observed MMD^2 statistic.
 
-- `adata`: the sample containing the MMD comparison results (`adata.uns["repspat_mmd_results"]`).
-- `plot = TRUE`: whether to draw the network graph in addition to returning the matrix.
-- `alpha`: the significance threshold used to decide which regions are linked (region pairs with `adj_p >= alpha` are considered similar).
+The function takes the following inputs:
+
+- `adata`: the AnnData object containing the pairwise comparison results.
+- `plot = TRUE`: whether to display the network in addition to returning the similarity matrix.
+- `alpha`: the false discovery rate (FDR) threshold used to determine which cluster pairs are considered similar. Cluster pairs with adj_p ≥ alpha are treated as repeated spatial patterns.
 
 ```{r plot-similarity-network, eval=exists("params") && isTRUE(params$run_analysis), warning=FALSE, out.width="100%"}
 similarity_matrix <- py_to_r(repspat$pairwise_results_to_matrix(
@@ -326,27 +312,27 @@ similarity_matrix <- py_to_r(repspat$pairwise_results_to_matrix(
 similarity_matrix
 ```
 
-A small adjusted p-value provides evidence that two regions differ. A larger adjusted p-value means that the test did not find strong evidence of a difference; it does not prove that the regions are identical.
+An adjusted p-value smaller than the FDR threshold (adj_p < 0.05) provides evidence that the two clusters have different feature distributions. An adjusted p-value greater than or equal to the threshold (adj_p ≥ 0.05) indicates that the analysis did not find sufficient evidence to distinguish their feature distributions. These cluster pairs are therefore treated as candidate repeated spatial patterns.
 
-The function returns a region-by-region adjacency matrix: regions considered similar (repeated patterns) are connected with their MMD value as the edge weight, while regions that were significantly different are left unconnected (0).
+The function returns a cluster-by-cluster adjacency matrix. Clusters identified as repeated spatial patterns are connected by edges weighted by their observed MMD^2 statistic, whereas significantly different cluster pairs are represented by 0.
 
-# Merge Regions Into Repeated Spatial Patterns
+# Relabel Repeated Spatial Patterns
 
-The MMD comparison and network plot showed which region pairs could not be statistically distinguished from each other, these are the repeated spatial patterns. Here, we manually specify which region labels to merge based on that result, combining them into a single shared label.
+The pairwise hypothesis tests identify repeated spatial patterns. Based on these results, we can assign a common label to clusters belonging to the same repeated spatial pattern. This step changes only the cluster labels.
 
 ```{r merge-regions, eval=exists("params") && isTRUE(params$run_analysis), out.width="100%"}
-clusters_to_merge <- c(2, 3, 7)   # edit: region labels you want merged
+clusters_to_merge <- c(2, 3, 7)   # edit: select labels to reassign
 new_label <- min(clusters_to_merge)
 labels <- py_to_r(py_get_item(adata$obs, "labels"))
 labels[labels %in% clusters_to_merge] <- new_label
 py_set_item(adata$obs, "updated_labels", as.integer(labels))
 ```
 
-The merged region assignment is now ready to be visualized alongside the original regions.
+The updated labels identify clusters belonging to the same repeated spatial pattern and can be visualized alongside the original cluster assignments.
 
-# Visualize the Merged Regions
+# Visualize the Relabeled Repeated Spatial Patterns
 
-Plotting the tissue by `updated_labels` shows how the regions look once statistically indistinguishable ones have been merged into shared groups.
+Plotting the tissue using updated_labels visualizes the repeated spatial patterns identified by the hypothesis tests.
 
 ```{r plot-merged-regions, eval=exists("params") && isTRUE(params$run_analysis), out.width="100%"}
 plt <- reticulate::import("matplotlib.pyplot")
@@ -362,8 +348,10 @@ plt$show()
 
 # Conclusion
 
-`repSpat` is a nonparametric framework for detecting repeated spatial patterns in spatial data. It combines constrained hierarchical clustering with a kernel based maximum mean discrepancy test and a block permutation procedure. Together, these correct for the over segmentation that constrained clustering methods often produce and allow spatially separate regions with similar feature distributions to be identified as the same underlying pattern.
+`repSpat` is a nonparametric framework for detecting repeated spatial patterns in spatial omics data. The framework consists of four main steps: constrained agglomerative hierarchical clustering, pairwise hypothesis testing using the maximum mean discrepancy squared statistic, block permutation to account for spatial dependence, and cluster relabeling based on the hypothesis testing results.
 
-Because the framework relies on distance based kernels, it generalizes across a variety of attribute types and controls the false discovery rate effectively even under weak to moderate spatial dependence. Applied here to the TNBC sample, it successfully recovered repeated patterns among the clustered regions, demonstrating its broader value for spatial omics data, where the same biological neighborhood can recur at multiple locations within a tissue.
+By comparing the full feature distributions of spatially constrained clusters, repSpat identifies spatially separated tissue regions that exhibit similar feature distributions and therefore represent repeated spatial patterns. Because the framework is based on distance-based kernels, it can be applied to a wide range of feature types, including continuous, binary, categorical, and compositional measurements.
 
-One limitation worth noting is that the test shows limited sensitivity to small shifts in spatial dependence alone, such as changes in autocorrelation strength. Repeated patterns are therefore best interpreted alongside region size, location, and biological context rather than the test result in isolation.
+In this vignette, we applied repSpat to a triple-negative breast cancer (TNBC) MIBI-TOF dataset and identified repeated spatial patterns across spatially separated regions of the tissue. These results illustrate how repSpat can help characterize recurring tissue organization in spatial omics data.
+
+An important direction for future development is feature selection. The current framework compares clusters using all available features, whereas many applications would benefit from identifying the subset of features that most strongly characterize repeated spatial patterns. We are actively developing feature selection methods for integration into repSpat, enabling more interpretable repeated spatial pattern detection and improved biological insight.

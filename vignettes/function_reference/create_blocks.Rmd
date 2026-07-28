@@ -30,5 +30,3 @@ The same AnnData object, updated in place, with the block assignment for every c
 ```python
 adata = create_blocks(adata, knn=8)
 ```
-
-[&larr; Back to reference index](index.html)

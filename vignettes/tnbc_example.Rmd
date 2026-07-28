@@ -23,7 +23,7 @@ The workflow uses five main package components:
 - `spatial_silhouette_analysis()` evaluates combinations of the number of nearest neighbors and the number of clusters to guide the selection of constrained clustering parameters.
 - `spatial_constrained_hac()` performs constrained agglomerative hierarchical clustering using the selected parameters.
 - `create_blocks()` partitions each cluster into smaller blocks for block-permutation testing
-- `multiple_comparison()` performs pairwise hypothesis tests between clusters to identify repeated spatial patterns using the Maximum Mean Discrepancy squared statistic and a block-permutation procedure
+- `multiple_comparison()` performs pairwise hypothesis tests between clusters to identify repeated spatial patterns using the maximum mean discrepancy squared (MMD²) statistic and a block-permutation procedure
 
 At the end of the workflow, clusters that are not found to differ significantly are grouped together as repeated spatial patterns.
 
@@ -260,16 +260,16 @@ The tissue has now been partitioned into spatially constrained clusters, and eac
 
 Failure to reject the null hypothesis indicates that the analysis does not find sufficient evidence of a difference between the two cluster distributions. Such cluster pairs are treated as candidate repeated spatial patterns. In contrast, rejection of the null hypothesis provides evidence that the clusters have different feature distributions.
 
-The observed MMD^2 value measures the discrepancy between the feature distributions of two clusters:
+The observed MMD² value measures the discrepancy between the feature distributions of two clusters:
 
-- A smaller MMD^2 value indicates greater similarity between the distributions.
-- A larger MMD^2 value indicates greater dissimilarity between the distributions.
+- A smaller MMD² value indicates greater similarity between the distributions.
+- A larger MMD² value indicates greater dissimilarity between the distributions.
 
 The function takes the following inputs:
 
 - `adata`: the AnnData object containing the feature data, cluster assignments, and permutation-block assignments.
 - `kernel`: the kernel used to compare feature distributions. repSpat supports "IMQ" and "Gaussian" kernels. Both assign greater similarity to cells with similar feature profiles. The inverse multiquadric ("IMQ") kernel decreases more gradually as feature distance increases, whereas the Gaussian kernel decreases more rapidly. In this example, we use "IMQ".
-- `nperm`: the number of block permutations used to approximate the null distribution of the MMD^2 statistic. Increasing the number of permutations generally produces more stable p-value estimates but requires additional computation.
+- `nperm`: the number of block permutations used to approximate the null distribution of the MMD² statistic. Increasing the number of permutations generally produces more stable p-value estimates but requires additional computation.
 - `adj_p = "BH"`: the method used to adjust p-values for the multiple pairwise tests. The Benjamini–Hochberg ("BH") procedure is used here to control the false discovery rate.
 
 ```{r mmd-results, eval=exists("params") && isTRUE(params$run_analysis)}
@@ -287,7 +287,7 @@ py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = li
 The results are stored in adata$uns["repspat_mmd_results"] and include:
 
 - `region_1` and `region_2`: the pair of clusters being compared.
-- `obs_mmd_sq`: the observed MMD^2 statistic.
+- `obs_mmd_sq`: the observed MMD² statistic.
 - `p_value`: the unadjusted p-value.
 - `adj_p`: the p-value adjusted for multiple comparisons using the selected procedure.
 
@@ -295,7 +295,7 @@ The results are stored in adata$uns["repspat_mmd_results"] and include:
 
 The pairwise hypothesis tests identify cluster pairs that do not show evidence of different feature distributions. Using the Benjamini–Hochberg procedure with a false discovery rate (FDR) threshold of 0.05, cluster pairs with adj_p ≥ 0.05 are treated as candidate repeated spatial patterns.
 
-This function visualizes these relationships as a network. Each node represents a cluster, and an edge connects two clusters that are not significantly different. The edge is labeled with the corresponding observed MMD^2 statistic.
+This function visualizes these relationships as a network. Each node represents a cluster, and an edge connects two clusters that are not significantly different. The edge is labeled with the corresponding observed MMD² statistic.
 
 The function takes the following inputs:
 
@@ -314,7 +314,7 @@ similarity_matrix
 
 An adjusted p-value smaller than the FDR threshold (adj_p < 0.05) provides evidence that the two clusters have different feature distributions. An adjusted p-value greater than or equal to the threshold (adj_p ≥ 0.05) indicates that the analysis did not find sufficient evidence to distinguish their feature distributions. These cluster pairs are therefore treated as candidate repeated spatial patterns.
 
-The function returns a cluster-by-cluster adjacency matrix. Clusters identified as repeated spatial patterns are connected by edges weighted by their observed MMD^2 statistic, whereas significantly different cluster pairs are represented by 0.
+The function returns a cluster-by-cluster adjacency matrix. Clusters identified as repeated spatial patterns are connected by edges weighted by their observed MMD² statistic, whereas significantly different cluster pairs are represented by 0.
 
 # Relabel Repeated Spatial Patterns
 
@@ -348,7 +348,7 @@ plt$show()
 
 # Conclusion
 
-`repSpat` is a nonparametric framework for detecting repeated spatial patterns in spatial omics data. The framework consists of four main steps: constrained agglomerative hierarchical clustering, pairwise hypothesis testing using the maximum mean discrepancy squared statistic, block permutation to account for spatial dependence, and cluster relabeling based on the hypothesis testing results.
+`repSpat` is a nonparametric framework for detecting repeated spatial patterns in spatial omics data. The framework consists of four main steps: constrained agglomerative hierarchical clustering, pairwise hypothesis testing using the MMD² statistic, block permutation to account for spatial dependence, and cluster relabeling based on the hypothesis testing results.
 
 By comparing the full feature distributions of spatially constrained clusters, repSpat identifies spatially separated tissue regions that exhibit similar feature distributions and therefore represent repeated spatial patterns. Because the framework is based on distance-based kernels, it can be applied to a wide range of feature types, including continuous, binary, categorical, and compositional measurements.
 

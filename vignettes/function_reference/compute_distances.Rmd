@@ -32,5 +32,3 @@ from repspat import compute_distances
 
 adata = compute_distances(adata, layer="layer 1", metric="euclidean")
 ```
-
-[&larr; Back to reference index](index.html)

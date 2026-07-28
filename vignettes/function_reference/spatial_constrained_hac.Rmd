@@ -32,5 +32,3 @@ The same AnnData object, updated in place, with the assigned cluster label for e
 ```python
 adata = spatial_constrained_hac(adata, n_clusters=7, n_neighs=8, linkage="ward")
 ```
-
-[&larr; Back to reference index](index.html)

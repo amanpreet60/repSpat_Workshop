@@ -192,6 +192,25 @@ main .page-header + .section > h6 {
   margin-top: 0.5rem;
 }
 
+// Give the function reference pages extra breathing room above their first
+// section heading (`## Description`), which sits directly under the page title.
+// Scoped via `.section.level2`: the reference pages open on a level-2 heading,
+// whereas the vignette articles open on a level-1 "Introduction", so this
+// leaves the vignettes' tighter 0.5rem spacing untouched. The added class
+// raises specificity above the generic first-section rule so it wins.
+main .page-header + .section.level2 > h2 {
+  margin-top: 2rem;
+}
+
+// Shrink pkgdown's "Source: vignettes/function_reference/…" link (a <small> in
+// the page header) by 2px, on the function reference pages only. Scoped by the
+// source href, which contains "function_reference/" on those pages but not on
+// the main vignettes. `calc(0.875em - 2px)` is the default <small> size (0.875
+// of the parent) minus 2px, i.e. two points smaller than it renders now.
+.page-header small:has(a[href*="function_reference/"]) {
+  font-size: calc(0.875em - 2px);
+}
+
 // Justify body paragraphs so the right margin lines up evenly with the
 // horizontal rules and code blocks instead of being ragged. Scoped to the
 // home page and vignette articles only; the citation/authors page has short

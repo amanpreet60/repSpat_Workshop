@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Mouse Visium Example: Detecting Repeated Spatial Patterns • repSpatWorkshop</title>
+<title>Mouse Visium Example • repSpatWorkshop</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Mouse Visium Example: Detecting Repeated Spatial Patterns">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Mouse Visium Example">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,7 +54,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Mouse Visium Example: Detecting Repeated Spatial Patterns</h1>
+      <h1>Mouse Visium Example</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/amanpreet60/repSpat_Workshop/blob/main/vignettes/mouse_example.Rmd" class="external-link"><code>vignettes/mouse_example.Rmd</code></a></small>
@@ -68,10 +68,10 @@
 </h2>
 <p>This is the mouse Visium version of the workflow. It follows the same
 steps as the main TNBC example, using continuous features and the
-Euclidean metric. The one difference is preprocessing: the full object
-is large (~48,556 cells), so we keep only a small contiguous crop of the
-tissue (~5,000 cells). See the main TNBC vignette for the detailed
-explanation of each step.</p>
+Euclidean metric. The one difference is in preprocessing: because the
+full object is large (~48,556 cells), only a small contiguous crop of
+the tissue (~5,000 cells) is retained for the analysis. For a detailed
+explanation of each step, see the main TNBC vignette.</p>
 </div>
 <div class="section level2">
 <h2 id="load-libraries">Load libraries<a class="anchor" aria-label="anchor" href="#load-libraries"></a>
@@ -86,13 +86,13 @@ explanation of each step.</p>
 <div class="section level2">
 <h2 id="prepare-the-sample">Prepare the Sample<a class="anchor" aria-label="anchor" href="#prepare-the-sample"></a>
 </h2>
-<p>The mouse object is a single tissue, so instead of selecting one
-sample we crop the spatial coordinates to a rectangular window centered
-on the tissue, sized to keep roughly 5,000 cells. Because it is a
-contiguous crop, local neighborhoods and density are preserved. The
-feature matrix is stored in a <code>"layer 1"</code> layer and a single
-<code>sample_id</code> label is added. Edit <code>target_cells</code> to
-change the crop size.</p>
+<p>Because the mouse object is a single tissue, rather than selecting
+one sample the spatial coordinates are cropped to a rectangular window
+centered on the tissue and sized to retain roughly 5,000 cells. Since
+the crop is contiguous, local neighborhoods and cell density are
+preserved. The feature matrix is stored in a <code>"layer 1"</code>
+layer and a single <code>sample_id</code> label is added. Edit
+<code>target_cells</code> to change the crop size.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata_full</span> <span class="op">&lt;-</span> <span class="va">anndata</span><span class="op">$</span><span class="fu">read_h5ad</span><span class="op">(</span><span class="va">brain_path</span><span class="op">)</span></span>
 <span></span>
@@ -128,9 +128,11 @@ change the crop size.</p>
 <div class="section level2">
 <h2 id="compute-feature-distances">Compute Feature Distances<a class="anchor" aria-label="anchor" href="#compute-feature-distances"></a>
 </h2>
-<p>We select the cropped tissue and compute pairwise distances from the
-<code>"layer 1"</code> layer using the <code>"euclidean"</code>
-metric.</p>
+<p>The first step of the workflow selects the cropped tissue and
+computes pairwise feature distances between its cells from the
+<code>"layer 1"</code> layer, using the <code>"euclidean"</code> metric.
+These distances are used in the subsequent steps to construct spatially
+constrained clusters.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">py</span><span class="op">$</span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">adata</span></span>
 <span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_eval.html" class="external-link">py_eval</a></span><span class="op">(</span><span class="st">"adata[adata.obs['sample_id'] == 'mouse_brain'].copy()"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -154,8 +156,9 @@ metric.</p>
 <div class="section level2">
 <h2 id="select-clustering-parameters">Select Clustering Parameters<a class="anchor" aria-label="anchor" href="#select-clustering-parameters"></a>
 </h2>
-<p>We test combinations of neighborhood size and cluster count and score
-each with the spatial silhouette score.</p>
+<p>Before clustering, combinations of neighborhood size and cluster
+count are evaluated and scored with the spatial silhouette score, which
+measures how well the resulting clusters are spatially separated.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_silhouette_analysis</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -166,13 +169,16 @@ each with the spatial silhouette score.</p>
 <span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"silhouette_scores"</span><span class="op">)</span></span></code></pre></div>
 <p>For this crop the scores are highest at a small number of clusters,
 so we proceed with <code>n_neighbors = 8</code> and
-<code>n_clusters = 7</code>.</p>
+<code>n_clusters = 7</code> for the clustering step.</p>
 </div>
 <div class="section level2">
 <h2 id="construct-spatially-constrained-clusters">Construct Spatially Constrained Clusters<a class="anchor" aria-label="anchor" href="#construct-spatially-constrained-clusters"></a>
 </h2>
-<p>We apply constrained agglomerative hierarchical clustering (CAHC)
-with the chosen parameters.</p>
+<p>Using the selected parameters, the cropped tissue is partitioned into
+spatially constrained clusters with constrained agglomerative
+hierarchical clustering (CAHC), which groups cells by feature similarity
+while enforcing spatial connectivity. The resulting cluster labels are
+stored in <code>adata.obs["labels"]</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_constrained_hac</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -181,7 +187,7 @@ with the chosen parameters.</p>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span>, <span class="st">"labels"</span><span class="op">)</span></span></code></pre></div>
-<p>The crop is divided into 7 spatially coherent clusters, each
+<p>The crop is partitioned into 7 spatially coherent clusters, each
 occupying a connected part of the tissue.</p>
 </div>
 <div class="section level2">
@@ -201,8 +207,8 @@ occupying a connected part of the tissue.</p>
 <div class="section level2">
 <h2 id="visualize-features-across-clusters">Visualize Features Across Clusters<a class="anchor" aria-label="anchor" href="#visualize-features-across-clusters"></a>
 </h2>
-<p>This shows the numeric features most enriched in each cluster
-compared to the rest of the tissue.</p>
+<p>For continuous features, this displays the features most enriched in
+each cluster relative to the rest of the tissue.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"matplotlib.pyplot"</span><span class="op">)</span></span>
 <span><span class="va">feature_plots</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">plot_cluster_feature_presence</span><span class="op">(</span></span>
@@ -223,8 +229,9 @@ compared to the rest of the tissue.</p>
 <div class="section level2">
 <h2 id="create-blocks-for-permutation">Create blocks for permutation<a class="anchor" aria-label="anchor" href="#create-blocks-for-permutation"></a>
 </h2>
-<p>We group cells into blocks within each cluster so permutation happens
-at the block level.</p>
+<p>To account for local spatial dependence, cells within each cluster
+are grouped into smaller blocks so that permutation is performed at the
+block level rather than the individual-cell level.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">create_blocks</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -237,9 +244,11 @@ at the block level.</p>
 <div class="section level2">
 <h2 id="test-spatial-invariance-between-clusters">Test Spatial Invariance Between Clusters<a class="anchor" aria-label="anchor" href="#test-spatial-invariance-between-clusters"></a>
 </h2>
-<p>We compare every pair of clusters with the MMD^2 statistic, using the
-<code>"IMQ"</code> kernel, 200 block permutations, and
-Benjamini–Hochberg correction.</p>
+<p>Every pair of clusters is compared using the MMD² statistic to test
+whether their feature distributions differ. The test uses the
+<code>"IMQ"</code> kernel, 200 block permutations to approximate the
+null distribution, and the Benjamini–Hochberg correction for multiple
+comparisons.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">multiple_comparison</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -251,15 +260,15 @@ Benjamini–Hochberg correction.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/r-py-conversion.html" class="external-link">py_to_r</a></span><span class="op">(</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">adata</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"repspat_mmd_results"</span><span class="op">)</span><span class="op">$</span><span class="fu">head</span><span class="op">(</span><span class="fl">5L</span><span class="op">)</span><span class="op">$</span><span class="fu">drop</span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"null_dist"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Cluster pairs with a small <code>obs_mmd_sq</code> and a large
-<code>adj_p</code> have similar feature profiles; those with a large
-MMD^2 and small <code>adj_p</code> are the clearly distinct
-clusters.</p>
+<code>adj_p</code> have similar feature profiles, whereas those with a
+large MMD² and a small <code>adj_p</code> are clearly distinct.</p>
 </div>
 <div class="section level2">
 <h2 id="visualize-repeated-spatial-patterns">Visualize Repeated Spatial Patterns<a class="anchor" aria-label="anchor" href="#visualize-repeated-spatial-patterns"></a>
 </h2>
-<p>Cluster pairs with <code>adj_p &gt;= 0.05</code> are repeated spatial
-patterns and are drawn as a network.</p>
+<p>Cluster pairs that are not significantly different
+(<code>adj_p &gt;= 0.05</code>) are treated as repeated spatial patterns
+and drawn as a network.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">similarity_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/r-py-conversion.html" class="external-link">py_to_r</a></span><span class="op">(</span><span class="va">repspat</span><span class="op">$</span><span class="fu">pairwise_results_to_matrix</span><span class="op">(</span></span>
 <span>    <span class="va">adata</span>,</span>
@@ -267,10 +276,10 @@ patterns and are drawn as a network.</p>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">similarity_matrix</span></span></code></pre></div>
-<p>For this dataset, every cluster pair was significantly different
-(<code>adj_p &lt; 0.05</code>), so the network has no connections. No
-repeated spatial patterns were detected, and there is nothing to
-relabel.</p>
+<p>For this dataset, every cluster pair was found to be significantly
+different (<code>adj_p &lt; 0.05</code>), so the network contains no
+connections. No repeated spatial patterns were detected, and there is
+nothing to relabel.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>

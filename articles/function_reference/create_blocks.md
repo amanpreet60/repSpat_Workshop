@@ -27,6 +27,3 @@ every cell stored in `adata.obs[block_key]`.
 ``` python
 adata = create_blocks(adata, knn=8)
 ```
-
-[← Back to reference
-index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

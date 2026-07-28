@@ -1,12 +1,13 @@
-# TNBC Example (Binary): Detecting Repeated Spatial Patterns
+# TNBC Example (Binary)
 
 ## Introduction
 
 This is the binary version of the TNBC workflow. It follows the same
-steps as the main example, but instead of using the continuous marker
-measurements, we threshold each marker into a present (`1`) or absent
-(`0`) value and compare cells with the Jaccard metric. See the main TNBC
-vignette for the detailed explanation of each step.
+steps as the main example, except that each marker measurement is
+thresholded into a present (`1`) or absent (`0`) value and cells are
+compared using the Jaccard metric, which is suited to binary
+present/absent data. For a detailed explanation of each step, see the
+main TNBC vignette.
 
 ## Load libraries
 
@@ -25,10 +26,11 @@ repspat <- import("repspat", convert = FALSE)
 
 ## Prepare the Sample
 
-We convert the `.rds` file into an AnnData object, threshold each marker
-into a present/absent value, and store the result in a `"binary"` layer
-alongside the original measurements in `X`. A marker is present when its
-value is equal to or greater than its threshold.
+In this step, the `.rds` file is converted into an AnnData object and
+each marker is thresholded into a present/absent value. The thresholded
+values are stored in a `"binary"` layer alongside the original
+measurements in `X`. A marker is considered present when its value is
+greater than or equal to its threshold.
 
 ``` r
 
@@ -65,9 +67,11 @@ adata
 
 ## Compute Feature Distances
 
-We select `Sample_04` and compute pairwise distances from the `"binary"`
-layer using the `"jaccard"` metric, which suits binary present/absent
-data.
+The first step of the workflow selects `Sample_04` and computes pairwise
+feature distances between its cells from the `"binary"` layer, using the
+`"jaccard"` metric suited to binary present/absent data. These distances
+are used in the subsequent steps to construct spatially constrained
+clusters.
 
 ``` r
 
@@ -96,8 +100,9 @@ print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 
 ## Select Clustering Parameters
 
-We test combinations of neighborhood size and cluster count and score
-each with the spatial silhouette score.
+Before clustering, combinations of neighborhood size and cluster count
+are evaluated and scored with the spatial silhouette score, which
+measures how well the resulting clusters are spatially separated.
 
 ``` r
 
@@ -110,12 +115,16 @@ cat("\n--------------------\n\n")
 py_get_item(data$uns, "silhouette_scores")
 ```
 
-We proceed with `n_neighbors = 8` and `n_clusters = 7`.
+We proceed with `n_neighbors = 8` and `n_clusters = 7` for the
+clustering step.
 
 ## Construct Spatially Constrained Clusters
 
-We apply constrained agglomerative hierarchical clustering (CAHC) with
-the chosen parameters.
+Using the selected parameters, the tissue is partitioned into spatially
+constrained clusters with constrained agglomerative hierarchical
+clustering (CAHC), which groups cells by feature similarity while
+enforcing spatial connectivity. The resulting cluster labels are stored
+in `adata.obs["labels"]`.
 
 ``` r
 
@@ -145,8 +154,8 @@ plt$show()
 
 ## Visualize Features Across Clusters
 
-For binary data, this shows the features most frequently present in each
-cluster.
+For binary features, this displays the features most frequently present
+in each cluster.
 
 ``` r
 
@@ -169,8 +178,9 @@ for (fig_axes in reticulate::iterate(feature_plots$values())) {
 
 ## Create blocks for permutation
 
-We group cells into blocks within each cluster so permutation happens at
-the block level.
+To account for local spatial dependence, cells within each cluster are
+grouped into smaller blocks so that permutation is performed at the
+block level rather than the individual-cell level.
 
 ``` r
 
@@ -185,9 +195,10 @@ py_get_item(data$obs, "repspat_block_id")
 
 ## Test Spatial Invariance Between Clusters
 
-We compare every pair of clusters with the MMD^2 statistic, using the
-`"IMQ"` kernel, 200 block permutations, and Benjamini–Hochberg
-correction.
+Every pair of clusters is compared using the MMD² statistic to test
+whether their feature distributions differ. The test uses the `"IMQ"`
+kernel, 200 block permutations to approximate the null distribution, and
+the Benjamini–Hochberg correction for multiple comparisons.
 
 ``` r
 
@@ -204,8 +215,8 @@ py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = li
 
 ## Visualize Repeated Spatial Patterns
 
-Cluster pairs with `adj_p >= 0.05` are repeated spatial patterns and are
-drawn as a network.
+Cluster pairs that are not significantly different (`adj_p >= 0.05`) are
+treated as repeated spatial patterns and drawn as a network.
 
 ``` r
 
@@ -219,8 +230,9 @@ similarity_matrix
 
 ## Relabel Repeated Spatial Patterns
 
-We relabel the clusters that could not be statistically distinguished
-with a single shared label.
+Based on the test results, the clusters that could not be statistically
+distinguished are assigned a single shared label. This step changes only
+the cluster labels.
 
 ``` r
 
@@ -245,6 +257,13 @@ plot_result <- repspat$plot_spatial_clusters(
 plt$subplots_adjust(right = 0.72)
 plt$show()
 ```
+
+## Running Multiple Samples
+
+Here we worked with just one sample, `Sample_04`, because every sample
+is its own piece of tissue with its own layout. If you have more
+samples, you can run the same steps on each one, one at a time, and then
+compare the repeated spatial patterns you find across them.
 
 ## Conclusion
 

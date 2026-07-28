@@ -2,7 +2,7 @@
 
 ## Description
 
-Runs a pairwise two-sample MMD^2 test between every pair of clusters,
+Runs a pairwise two-sample MMD² test between every pair of clusters,
 using cluster labels, block IDs, and distances read from the AnnData
 object. Adjusts p-values across all pairs, stores results in
 `adata.uns["repspat_mmd_results"]`, prints the storage location, and
@@ -36,6 +36,3 @@ adata = multiple_comparison(adata, kernel="IMQ")
 results = adata.uns["repspat_mmd_results"]
 print(results[results["adj_p"] >= 0.05])
 ```
-
-[← Back to reference
-index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

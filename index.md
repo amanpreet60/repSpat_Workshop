@@ -7,8 +7,8 @@ separated tissue regions with similar distributions of features, such as
 gene expression, cell types, binary markers, and other molecular or
 cellular measurements. The repSpat provides a nonparametric statistical
 inference framework based on spatially constrained clustering followed
-by multiple hypothesis testing between clusters using the Maximum Mean
-Discrepancy (MMD) squared statistic and a block-permutation procedure.
+by multiple hypothesis testing between clusters using the maximum mean
+discrepancy squared (MMD²) statistic and a block-permutation procedure.
 This enables formal hypothesis testing for repeated spatial patterns.
 The Python implementation of repSpat accepts input data in the
 [AnnData](https://anndata.readthedocs.io/en/latest/index.html) (.h5ad)
@@ -35,8 +35,7 @@ By the end of this workshop, participants will be able to:
   importance in spatial omics data.
 - Apply constrained agglomerative hierarchical clustering (CAHC) to
   obtain partition tissue into spatially contiguous clusters.
-- Test for spatial invariance between clusters using the MMD squared
-  statistic
+- Test for spatial invariance between clusters using the MMD² statistic
 - Approximate the null distribution of the MMD² statistic using block
   permutation that preserves spatial dependence.
 - Reassign cluster labels based on pairwise similarity to identify
@@ -47,6 +46,16 @@ By the end of this workshop, participants will be able to:
 ## Workshop Length
 
 90 minutes.
+
+## Required R Packages
+
+- BiocStyle (Bioconductor)
+- SpatialExperiment (Bioconductor)
+- SingleCellExperiment (Bioconductor)
+- SummarizedExperiment (Bioconductor)
+- reticulate (CRAN)
+- knitr (CRAN)
+- rmarkdown (CRAN)
 
 ## Prerequisites
 

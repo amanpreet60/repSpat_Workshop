@@ -87,7 +87,7 @@ corresponding network graph.</p>
 <tbody>
 <tr class="odd">
 <td><code>adata</code></td>
-<td>AnnData object containing MMD^2 comparison results (see <a href="multiple_comparison.html"><code>multiple_comparison()</code></a>),
+<td>AnnData object containing MMD² comparison results (see <a href="multiple_comparison.html"><code>multiple_comparison()</code></a>),
 or a DataFrame with the same columns.</td>
 </tr>
 <tr class="even">
@@ -108,14 +108,13 @@ Default <code>0.05</code>.</td>
 </h2>
 <p>A cluster-by-cluster adjacency <code>DataFrame</code>. Clusters
 considered similar (repeated patterns) are connected with their observed
-MMD^2 as the edge weight; clusters found to be significantly different
+MMD² as the edge weight; clusters found to be significantly different
 are left unconnected (<code>0</code>).</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>matrix <span class="op">=</span> pairwise_results_to_matrix(adata)</span></code></pre></div>
-<p><a href="index.html">← Back to reference index</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

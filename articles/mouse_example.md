@@ -1,13 +1,13 @@
-# Mouse Visium Example: Detecting Repeated Spatial Patterns
+# Mouse Visium Example
 
 ## Introduction
 
 This is the mouse Visium version of the workflow. It follows the same
 steps as the main TNBC example, using continuous features and the
-Euclidean metric. The one difference is preprocessing: the full object
-is large (~48,556 cells), so we keep only a small contiguous crop of the
-tissue (~5,000 cells). See the main TNBC vignette for the detailed
-explanation of each step.
+Euclidean metric. The one difference is in preprocessing: because the
+full object is large (~48,556 cells), only a small contiguous crop of
+the tissue (~5,000 cells) is retained for the analysis. For a detailed
+explanation of each step, see the main TNBC vignette.
 
 ## Load libraries
 
@@ -25,12 +25,13 @@ repspat <- import("repspat", convert = FALSE)
 
 ## Prepare the Sample
 
-The mouse object is a single tissue, so instead of selecting one sample
-we crop the spatial coordinates to a rectangular window centered on the
-tissue, sized to keep roughly 5,000 cells. Because it is a contiguous
-crop, local neighborhoods and density are preserved. The feature matrix
-is stored in a `"layer 1"` layer and a single `sample_id` label is
-added. Edit `target_cells` to change the crop size.
+Because the mouse object is a single tissue, rather than selecting one
+sample the spatial coordinates are cropped to a rectangular window
+centered on the tissue and sized to retain roughly 5,000 cells. Since
+the crop is contiguous, local neighborhoods and cell density are
+preserved. The feature matrix is stored in a `"layer 1"` layer and a
+single `sample_id` label is added. Edit `target_cells` to change the
+crop size.
 
 ``` r
 
@@ -68,8 +69,10 @@ adata
 
 ## Compute Feature Distances
 
-We select the cropped tissue and compute pairwise distances from the
-`"layer 1"` layer using the `"euclidean"` metric.
+The first step of the workflow selects the cropped tissue and computes
+pairwise feature distances between its cells from the `"layer 1"` layer,
+using the `"euclidean"` metric. These distances are used in the
+subsequent steps to construct spatially constrained clusters.
 
 ``` r
 
@@ -98,8 +101,9 @@ print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 
 ## Select Clustering Parameters
 
-We test combinations of neighborhood size and cluster count and score
-each with the spatial silhouette score.
+Before clustering, combinations of neighborhood size and cluster count
+are evaluated and scored with the spatial silhouette score, which
+measures how well the resulting clusters are spatially separated.
 
 ``` r
 
@@ -113,12 +117,16 @@ py_get_item(data$uns, "silhouette_scores")
 ```
 
 For this crop the scores are highest at a small number of clusters, so
-we proceed with `n_neighbors = 8` and `n_clusters = 7`.
+we proceed with `n_neighbors = 8` and `n_clusters = 7` for the
+clustering step.
 
 ## Construct Spatially Constrained Clusters
 
-We apply constrained agglomerative hierarchical clustering (CAHC) with
-the chosen parameters.
+Using the selected parameters, the cropped tissue is partitioned into
+spatially constrained clusters with constrained agglomerative
+hierarchical clustering (CAHC), which groups cells by feature similarity
+while enforcing spatial connectivity. The resulting cluster labels are
+stored in `adata.obs["labels"]`.
 
 ``` r
 
@@ -131,8 +139,8 @@ cat("\n--------------------\n\n")
 py_get_item(data$obs, "labels")
 ```
 
-The crop is divided into 7 spatially coherent clusters, each occupying a
-connected part of the tissue.
+The crop is partitioned into 7 spatially coherent clusters, each
+occupying a connected part of the tissue.
 
 ## Visualize the Spatially Constrained Clusters
 
@@ -151,8 +159,8 @@ plt$show()
 
 ## Visualize Features Across Clusters
 
-This shows the numeric features most enriched in each cluster compared
-to the rest of the tissue.
+For continuous features, this displays the features most enriched in
+each cluster relative to the rest of the tissue.
 
 ``` r
 
@@ -175,8 +183,9 @@ for (fig_axes in reticulate::iterate(feature_plots$values())) {
 
 ## Create blocks for permutation
 
-We group cells into blocks within each cluster so permutation happens at
-the block level.
+To account for local spatial dependence, cells within each cluster are
+grouped into smaller blocks so that permutation is performed at the
+block level rather than the individual-cell level.
 
 ``` r
 
@@ -191,9 +200,10 @@ py_get_item(data$obs, "repspat_block_id")
 
 ## Test Spatial Invariance Between Clusters
 
-We compare every pair of clusters with the MMD^2 statistic, using the
-`"IMQ"` kernel, 200 block permutations, and Benjamini–Hochberg
-correction.
+Every pair of clusters is compared using the MMD² statistic to test
+whether their feature distributions differ. The test uses the `"IMQ"`
+kernel, 200 block permutations to approximate the null distribution, and
+the Benjamini–Hochberg correction for multiple comparisons.
 
 ``` r
 
@@ -209,13 +219,13 @@ py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = li
 ```
 
 Cluster pairs with a small `obs_mmd_sq` and a large `adj_p` have similar
-feature profiles; those with a large MMD^2 and small `adj_p` are the
-clearly distinct clusters.
+feature profiles, whereas those with a large MMD² and a small `adj_p`
+are clearly distinct.
 
 ## Visualize Repeated Spatial Patterns
 
-Cluster pairs with `adj_p >= 0.05` are repeated spatial patterns and are
-drawn as a network.
+Cluster pairs that are not significantly different (`adj_p >= 0.05`) are
+treated as repeated spatial patterns and drawn as a network.
 
 ``` r
 
@@ -227,9 +237,10 @@ similarity_matrix <- py_to_r(repspat$pairwise_results_to_matrix(
 similarity_matrix
 ```
 
-For this dataset, every cluster pair was significantly different
-(`adj_p < 0.05`), so the network has no connections. No repeated spatial
-patterns were detected, and there is nothing to relabel.
+For this dataset, every cluster pair was found to be significantly
+different (`adj_p < 0.05`), so the network contains no connections. No
+repeated spatial patterns were detected, and there is nothing to
+relabel.
 
 ## Conclusion
 

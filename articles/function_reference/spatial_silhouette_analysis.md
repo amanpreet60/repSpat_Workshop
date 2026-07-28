@@ -2,12 +2,12 @@
 
 ## Description
 
-Runs a spatially-aware silhouette analysis over combinations of
-k-nearest spatial neighbors and cluster counts. For each combination,
-cells are clustered with spatially constrained hierarchical clustering,
-then a silhouette-like score is computed comparing each cell to its own
-cluster and to spatially adjacent clusters only. Stores a DataFrame of
-scores in `adata.uns["silhouette_scores"]` and returns the same `adata`.
+Runs a spatial silhouette analysis over combinations of nearest-neighbor
+counts and cluster counts. For each combination, cells are clustered
+with constrained agglomerative hierarchical clustering, then a spatial
+silhouette score is computed comparing each cell to its own cluster and
+to spatially adjacent clusters only. Stores a DataFrame of scores in
+`adata.uns["silhouette_scores"]` and returns the same `adata`.
 
 ## Arguments
 
@@ -34,6 +34,3 @@ adata = spatial_silhouette_analysis(
 )
 adata.uns["silhouette_scores"]
 ```
-
-[← Back to reference
-index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

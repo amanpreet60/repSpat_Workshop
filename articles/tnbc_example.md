@@ -25,8 +25,8 @@ The workflow uses five main package components:
 - `create_blocks()` partitions each cluster into smaller blocks for
   block-permutation testing
 - `multiple_comparison()` performs pairwise hypothesis tests between
-  clusters to identify repeated spatial patterns using the Maximum Mean
-  Discrepancy squared statistic and a block-permutation procedure
+  clusters to identify repeated spatial patterns using the maximum mean
+  discrepancy squared (MMD²) statistic and a block-permutation procedure
 
 At the end of the workflow, clusters that are not found to differ
 significantly are grouped together as repeated spatial patterns.
@@ -362,12 +362,12 @@ distributions. Such cluster pairs are treated as candidate repeated
 spatial patterns. In contrast, rejection of the null hypothesis provides
 evidence that the clusters have different feature distributions.
 
-The observed MMD^2 value measures the discrepancy between the feature
+The observed MMD² value measures the discrepancy between the feature
 distributions of two clusters:
 
-- A smaller MMD^2 value indicates greater similarity between the
+- A smaller MMD² value indicates greater similarity between the
   distributions.
-- A larger MMD^2 value indicates greater dissimilarity between the
+- A larger MMD² value indicates greater dissimilarity between the
   distributions.
 
 The function takes the following inputs:
@@ -381,7 +381,7 @@ The function takes the following inputs:
   whereas the Gaussian kernel decreases more rapidly. In this example,
   we use “IMQ”.
 - `nperm`: the number of block permutations used to approximate the null
-  distribution of the MMD^2 statistic. Increasing the number of
+  distribution of the MMD² statistic. Increasing the number of
   permutations generally produces more stable p-value estimates but
   requires additional computation.
 - `adj_p = "BH"`: the method used to adjust p-values for the multiple
@@ -405,7 +405,7 @@ The results are stored in adata\$uns\[“repspat_mmd_results”\] and
 include:
 
 - `region_1` and `region_2`: the pair of clusters being compared.
-- `obs_mmd_sq`: the observed MMD^2 statistic.
+- `obs_mmd_sq`: the observed MMD² statistic.
 - `p_value`: the unadjusted p-value.
 - `adj_p`: the p-value adjusted for multiple comparisons using the
   selected procedure.
@@ -421,7 +421,7 @@ repeated spatial patterns.
 This function visualizes these relationships as a network. Each node
 represents a cluster, and an edge connects two clusters that are not
 significantly different. The edge is labeled with the corresponding
-observed MMD^2 statistic.
+observed MMD² statistic.
 
 The function takes the following inputs:
 
@@ -453,7 +453,7 @@ patterns.
 
 The function returns a cluster-by-cluster adjacency matrix. Clusters
 identified as repeated spatial patterns are connected by edges weighted
-by their observed MMD^2 statistic, whereas significantly different
+by their observed MMD² statistic, whereas significantly different
 cluster pairs are represented by 0.
 
 ## Relabel Repeated Spatial Patterns
@@ -499,9 +499,9 @@ plt$show()
 `repSpat` is a nonparametric framework for detecting repeated spatial
 patterns in spatial omics data. The framework consists of four main
 steps: constrained agglomerative hierarchical clustering, pairwise
-hypothesis testing using the maximum mean discrepancy squared statistic,
-block permutation to account for spatial dependence, and cluster
-relabeling based on the hypothesis testing results.
+hypothesis testing using the MMD² statistic, block permutation to
+account for spatial dependence, and cluster relabeling based on the
+hypothesis testing results.
 
 By comparing the full feature distributions of spatially constrained
 clusters, repSpat identifies spatially separated tissue regions that

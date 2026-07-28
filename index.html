@@ -53,7 +53,7 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="repspat">repSpat<a class="anchor" aria-label="anchor" href="#repspat"></a>
 </h1></div>
-<p>This workshop demonstrates how to use the Python implementation of repSpat within R through the reticulate package. RepSpat detects repeated spatial patterns in spatial omics data, defined as spatially separated tissue regions with similar distributions of features, such as gene expression, cell types, binary markers, and other molecular or cellular measurements. The repSpat provides a nonparametric statistical inference framework based on spatially constrained clustering followed by multiple hypothesis testing between clusters using the Maximum Mean Discrepancy (MMD) squared statistic and a block-permutation procedure. This enables formal hypothesis testing for repeated spatial patterns. The Python implementation of repSpat accepts input data in the <a href="https://anndata.readthedocs.io/en/latest/index.html" class="external-link">AnnData</a> (.h5ad) format, a widely used data structure for single-cell and spatial omics analyses. For Bioconductor users, SpatialExperiment objects can be readily converted to AnnData format within R before analysis.</p>
+<p>This workshop demonstrates how to use the Python implementation of repSpat within R through the reticulate package. RepSpat detects repeated spatial patterns in spatial omics data, defined as spatially separated tissue regions with similar distributions of features, such as gene expression, cell types, binary markers, and other molecular or cellular measurements. The repSpat provides a nonparametric statistical inference framework based on spatially constrained clustering followed by multiple hypothesis testing between clusters using the maximum mean discrepancy squared (MMD²) statistic and a block-permutation procedure. This enables formal hypothesis testing for repeated spatial patterns. The Python implementation of repSpat accepts input data in the <a href="https://anndata.readthedocs.io/en/latest/index.html" class="external-link">AnnData</a> (.h5ad) format, a widely used data structure for single-cell and spatial omics analyses. For Bioconductor users, SpatialExperiment objects can be readily converted to AnnData format within R before analysis.</p>
 <p>The Python package is available on GitHub, and this workshop demonstrates how to use its functionality from R through the reticulate package.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://rstudio.github.io/reticulate/" class="external-link">reticulate</a></span><span class="op">)</span></span>
@@ -66,8 +66,8 @@
 <ul>
 <li>Understand the concept of repeated spatial patterns and their importance in spatial omics data.</li>
 <li>Apply constrained agglomerative hierarchical clustering (CAHC) to obtain partition tissue into spatially contiguous clusters.</li>
-<li>Test for spatial invariance between clusters using the MMD squared statistic</li>
-<li>Approximate the null distribution of the MMD<sup>2</sup> statistic using block permutation that preserves spatial dependence.</li>
+<li>Test for spatial invariance between clusters using the MMD² statistic</li>
+<li>Approximate the null distribution of the MMD² statistic using block permutation that preserves spatial dependence.</li>
 <li>Reassign cluster labels based on pairwise similarity to identify repeated spatial patterns.</li>
 <li>Apply the complete repSpat workflow to analyze spatial omics datasets and interpret the resulting repeated spatial patterns.</li>
 </ul>
@@ -76,6 +76,19 @@
 <h2 id="workshop-length">Workshop Length<a class="anchor" aria-label="anchor" href="#workshop-length"></a>
 </h2>
 <p>90 minutes.</p>
+</div>
+<div class="section level2">
+<h2 id="required-r-packages">Required R Packages<a class="anchor" aria-label="anchor" href="#required-r-packages"></a>
+</h2>
+<ul>
+<li>BiocStyle (Bioconductor)</li>
+<li>SpatialExperiment (Bioconductor)</li>
+<li>SingleCellExperiment (Bioconductor)</li>
+<li>SummarizedExperiment (Bioconductor)</li>
+<li>reticulate (CRAN)</li>
+<li>knitr (CRAN)</li>
+<li>rmarkdown (CRAN)</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="prerequisites">Prerequisites<a class="anchor" aria-label="anchor" href="#prerequisites"></a>

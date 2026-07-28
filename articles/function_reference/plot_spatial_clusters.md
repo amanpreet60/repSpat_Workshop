@@ -26,6 +26,3 @@ A `(figure, axes)` tuple from `matplotlib`.
 ``` python
 plot_spatial_clusters(adata, label_key="labels", point_size=4)
 ```
-
-[← Back to reference
-index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

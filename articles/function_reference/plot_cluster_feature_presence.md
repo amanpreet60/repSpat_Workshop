@@ -4,8 +4,8 @@
 
 For every cluster, draws a spatial highlight next to a chart of its most
 defining features. Binary features are shown as presence rates within
-the cluster; if no binary features are available, numeric features are
-shown as cluster-vs-rest standardized enrichment scores.
+the cluster; if no binary features are available, continuous features
+are shown as cluster-vs-rest standardized enrichment scores.
 
 ## Arguments
 
@@ -28,6 +28,3 @@ A dict mapping each cluster’s ID to its `(figure, axes)` pair.
 ``` python
 cluster_figures = plot_cluster_feature_presence(adata, top_n=10)
 ```
-
-[← Back to reference
-index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

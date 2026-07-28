@@ -66,12 +66,12 @@
 <div class="section level2">
 <h2 id="description">Description<a class="anchor" aria-label="anchor" href="#description"></a>
 </h2>
-<p>Runs a spatially-aware silhouette analysis over combinations of
-k-nearest spatial neighbors and cluster counts. For each combination,
-cells are clustered with spatially constrained hierarchical clustering,
-then a silhouette-like score is computed comparing each cell to its own
-cluster and to spatially adjacent clusters only. Stores a DataFrame of
-scores in <code>adata.uns["silhouette_scores"]</code> and returns the
+<p>Runs a spatial silhouette analysis over combinations of
+nearest-neighbor counts and cluster counts. For each combination, cells
+are clustered with constrained agglomerative hierarchical clustering,
+then a spatial silhouette score is computed comparing each cell to its
+own cluster and to spatially adjacent clusters only. Stores a DataFrame
+of scores in <code>adata.uns["silhouette_scores"]</code> and returns the
 same <code>adata</code>.</p>
 </div>
 <div class="section level2">
@@ -124,7 +124,6 @@ for every <code>(n_neighbors, n_clusters)</code> combination stored in
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>    n_clusters_range<span class="op">=</span><span class="bu">range</span>(<span class="dv">4</span>, <span class="dv">9</span>),</span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>)</span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>adata.uns[<span class="st">"silhouette_scores"</span>]</span></code></pre></div>
-<p><a href="index.html">← Back to reference index</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

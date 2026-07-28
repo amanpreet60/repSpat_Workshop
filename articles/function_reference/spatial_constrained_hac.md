@@ -31,6 +31,3 @@ label for every cell stored in `adata.obs["labels"]`.
 ``` python
 adata = spatial_constrained_hac(adata, n_clusters=7, n_neighs=8, linkage="ward")
 ```
-
-[← Back to reference
-index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

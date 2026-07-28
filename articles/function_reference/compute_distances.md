@@ -27,6 +27,3 @@ from repspat import compute_distances
 
 adata = compute_distances(adata, layer="layer 1", metric="euclidean")
 ```
-
-[← Back to reference
-index](https://amanpreet60.github.io/repSpat_Workshop/articles/function_reference/index.md)

@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>TNBC Example (Binary): Detecting Repeated Spatial Patterns • repSpatWorkshop</title>
+<title>TNBC Example (Binary) • repSpatWorkshop</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="TNBC Example (Binary): Detecting Repeated Spatial Patterns">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="TNBC Example (Binary)">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -54,7 +54,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>TNBC Example (Binary): Detecting Repeated Spatial Patterns</h1>
+      <h1>TNBC Example (Binary)</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/amanpreet60/repSpat_Workshop/blob/main/vignettes/tnbc_example_binary.Rmd" class="external-link"><code>vignettes/tnbc_example_binary.Rmd</code></a></small>
@@ -67,11 +67,11 @@
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
 <p>This is the binary version of the TNBC workflow. It follows the same
-steps as the main example, but instead of using the continuous marker
-measurements, we threshold each marker into a present (<code>1</code>)
-or absent (<code>0</code>) value and compare cells with the Jaccard
-metric. See the main TNBC vignette for the detailed explanation of each
-step.</p>
+steps as the main example, except that each marker measurement is
+thresholded into a present (<code>1</code>) or absent (<code>0</code>)
+value and cells are compared using the Jaccard metric, which is suited
+to binary present/absent data. For a detailed explanation of each step,
+see the main TNBC vignette.</p>
 </div>
 <div class="section level2">
 <h2 id="load-libraries">Load libraries<a class="anchor" aria-label="anchor" href="#load-libraries"></a>
@@ -87,11 +87,11 @@ step.</p>
 <div class="section level2">
 <h2 id="prepare-the-sample">Prepare the Sample<a class="anchor" aria-label="anchor" href="#prepare-the-sample"></a>
 </h2>
-<p>We convert the <code>.rds</code> file into an AnnData object,
-threshold each marker into a present/absent value, and store the result
-in a <code>"binary"</code> layer alongside the original measurements in
-<code>X</code>. A marker is present when its value is equal to or
-greater than its threshold.</p>
+<p>In this step, the <code>.rds</code> file is converted into an AnnData
+object and each marker is thresholded into a present/absent value. The
+thresholded values are stored in a <code>"binary"</code> layer alongside
+the original measurements in <code>X</code>. A marker is considered
+present when its value is greater than or equal to its threshold.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rds_path</span> <span class="op">&lt;-</span> <span class="st">"../inst/extdata/03_TNBC_2018_spe.rds"</span></span>
 <span><span class="va">h5ad_path</span> <span class="op">&lt;-</span> <span class="st">"../inst/extdata/03_TNBC_2018_spe_binary.h5ad"</span></span>
@@ -126,9 +126,11 @@ greater than its threshold.</p>
 <div class="section level2">
 <h2 id="compute-feature-distances">Compute Feature Distances<a class="anchor" aria-label="anchor" href="#compute-feature-distances"></a>
 </h2>
-<p>We select <code>Sample_04</code> and compute pairwise distances from
-the <code>"binary"</code> layer using the <code>"jaccard"</code> metric,
-which suits binary present/absent data.</p>
+<p>The first step of the workflow selects <code>Sample_04</code> and
+computes pairwise feature distances between its cells from the
+<code>"binary"</code> layer, using the <code>"jaccard"</code> metric
+suited to binary present/absent data. These distances are used in the
+subsequent steps to construct spatially constrained clusters.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">py</span><span class="op">$</span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">adata</span></span>
 <span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_eval.html" class="external-link">py_eval</a></span><span class="op">(</span><span class="st">"adata[adata.obs['sample_id'] == 'Sample_04'].copy()"</span>, convert <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -152,8 +154,9 @@ which suits binary present/absent data.</p>
 <div class="section level2">
 <h2 id="select-clustering-parameters">Select Clustering Parameters<a class="anchor" aria-label="anchor" href="#select-clustering-parameters"></a>
 </h2>
-<p>We test combinations of neighborhood size and cluster count and score
-each with the spatial silhouette score.</p>
+<p>Before clustering, combinations of neighborhood size and cluster
+count are evaluated and scored with the spatial silhouette score, which
+measures how well the resulting clusters are spatially separated.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_silhouette_analysis</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -163,13 +166,16 @@ each with the spatial silhouette score.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"silhouette_scores"</span><span class="op">)</span></span></code></pre></div>
 <p>We proceed with <code>n_neighbors = 8</code> and
-<code>n_clusters = 7</code>.</p>
+<code>n_clusters = 7</code> for the clustering step.</p>
 </div>
 <div class="section level2">
 <h2 id="construct-spatially-constrained-clusters">Construct Spatially Constrained Clusters<a class="anchor" aria-label="anchor" href="#construct-spatially-constrained-clusters"></a>
 </h2>
-<p>We apply constrained agglomerative hierarchical clustering (CAHC)
-with the chosen parameters.</p>
+<p>Using the selected parameters, the tissue is partitioned into
+spatially constrained clusters with constrained agglomerative
+hierarchical clustering (CAHC), which groups cells by feature similarity
+while enforcing spatial connectivity. The resulting cluster labels are
+stored in <code>adata.obs["labels"]</code>.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_constrained_hac</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -196,8 +202,8 @@ with the chosen parameters.</p>
 <div class="section level2">
 <h2 id="visualize-features-across-clusters">Visualize Features Across Clusters<a class="anchor" aria-label="anchor" href="#visualize-features-across-clusters"></a>
 </h2>
-<p>For binary data, this shows the features most frequently present in
-each cluster.</p>
+<p>For binary features, this displays the features most frequently
+present in each cluster.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">plt</span> <span class="op">&lt;-</span> <span class="fu">reticulate</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/import.html" class="external-link">import</a></span><span class="op">(</span><span class="st">"matplotlib.pyplot"</span><span class="op">)</span></span>
 <span><span class="va">feature_plots</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">plot_cluster_feature_presence</span><span class="op">(</span></span>
@@ -218,8 +224,9 @@ each cluster.</p>
 <div class="section level2">
 <h2 id="create-blocks-for-permutation">Create blocks for permutation<a class="anchor" aria-label="anchor" href="#create-blocks-for-permutation"></a>
 </h2>
-<p>We group cells into blocks within each cluster so permutation happens
-at the block level.</p>
+<p>To account for local spatial dependence, cells within each cluster
+are grouped into smaller blocks so that permutation is performed at the
+block level rather than the individual-cell level.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">create_blocks</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -232,9 +239,11 @@ at the block level.</p>
 <div class="section level2">
 <h2 id="test-spatial-invariance-between-clusters">Test Spatial Invariance Between Clusters<a class="anchor" aria-label="anchor" href="#test-spatial-invariance-between-clusters"></a>
 </h2>
-<p>We compare every pair of clusters with the MMD^2 statistic, using the
-<code>"IMQ"</code> kernel, 200 block permutations, and
-Benjamini–Hochberg correction.</p>
+<p>Every pair of clusters is compared using the MMD² statistic to test
+whether their feature distributions differ. The test uses the
+<code>"IMQ"</code> kernel, 200 block permutations to approximate the
+null distribution, and the Benjamini–Hochberg correction for multiple
+comparisons.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">multiple_comparison</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
@@ -249,8 +258,9 @@ Benjamini–Hochberg correction.</p>
 <div class="section level2">
 <h2 id="visualize-repeated-spatial-patterns">Visualize Repeated Spatial Patterns<a class="anchor" aria-label="anchor" href="#visualize-repeated-spatial-patterns"></a>
 </h2>
-<p>Cluster pairs with <code>adj_p &gt;= 0.05</code> are repeated spatial
-patterns and are drawn as a network.</p>
+<p>Cluster pairs that are not significantly different
+(<code>adj_p &gt;= 0.05</code>) are treated as repeated spatial patterns
+and drawn as a network.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">similarity_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/r-py-conversion.html" class="external-link">py_to_r</a></span><span class="op">(</span><span class="va">repspat</span><span class="op">$</span><span class="fu">pairwise_results_to_matrix</span><span class="op">(</span></span>
 <span>    <span class="va">adata</span>,</span>
@@ -262,8 +272,9 @@ patterns and are drawn as a network.</p>
 <div class="section level2">
 <h2 id="relabel-repeated-spatial-patterns">Relabel Repeated Spatial Patterns<a class="anchor" aria-label="anchor" href="#relabel-repeated-spatial-patterns"></a>
 </h2>
-<p>We relabel the clusters that could not be statistically distinguished
-with a single shared label.</p>
+<p>Based on the test results, the clusters that could not be
+statistically distinguished are assigned a single shared label. This
+step changes only the cluster labels.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_to_merge</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">3</span>, <span class="fl">5</span>, <span class="fl">6</span><span class="op">)</span>   <span class="co"># edit: select labels to reassign</span></span>
 <span><span class="va">new_label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">clusters_to_merge</span><span class="op">)</span></span>
@@ -284,6 +295,14 @@ with a single shared label.</p>
 <span><span class="op">)</span></span>
 <span><span class="va">plt</span><span class="op">$</span><span class="fu">subplots_adjust</span><span class="op">(</span>right <span class="op">=</span> <span class="fl">0.72</span><span class="op">)</span></span>
 <span><span class="va">plt</span><span class="op">$</span><span class="fu">show</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="running-multiple-samples">Running Multiple Samples<a class="anchor" aria-label="anchor" href="#running-multiple-samples"></a>
+</h2>
+<p>Here we worked with just one sample, <code>Sample_04</code>, because
+every sample is its own piece of tissue with its own layout. If you have
+more samples, you can run the same steps on each one, one at a time, and
+then compare the repeated spatial patterns you find across them.</p>
 </div>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>

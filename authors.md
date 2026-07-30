@@ -9,7 +9,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/amanpreet60/repSpat_Workshop/blob/data-in-container/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/amanpreet60/repSpat_Workshop/blob/main/DESCRIPTION)
 
 Singh A, Jeganathan P (2026). *repSpatWorkshop: Detecting Repeated
 Spatial Patterns With repSpat*. R package version 0.0.1,

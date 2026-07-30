@@ -63,7 +63,7 @@ py_set_item(adata$layers, "layer 1", adata$X)
 n_cells <- as.integer(py_to_r(adata$n_obs))
 py_set_item(adata$obs, "sample_id", r_to_py(rep("mouse_brain", n_cells)))
 
-adata$write_h5ad(h5ad_path)
+adata$write_h5ad(h5ad_path, compression = "gzip")
 adata
 ```
 

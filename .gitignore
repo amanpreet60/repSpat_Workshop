@@ -12,6 +12,9 @@ vignettes/*.html
 vignettes/*.R
 
 inst/extdata/*.h5ad
+# The source dataset ships with the repo so the Docker image (and a fresh clone)
+# has it without a separate download. Stored uint16 + gzip: 23 MB, not 383 MB.
+!inst/extdata/brain_data.h5ad
 .RDataTmp
 .quarto
 .Rbuildignore

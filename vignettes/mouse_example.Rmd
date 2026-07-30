@@ -34,7 +34,7 @@ repspat <- import("repspat", convert = FALSE)
 Because the mouse object is a single tissue, rather than selecting one sample the spatial coordinates are cropped to a rectangular window centered on the tissue and sized to retain roughly 5,000 cells. Since the crop is contiguous, local neighborhoods and cell density are preserved. The feature matrix is stored in a `"layer 1"` layer and a single `sample_id` label is added. Edit `target_cells` to change the crop size.
 
 ```{r crop-settings, echo=exists("params") && isTRUE(params$show_data_prep_code)}
-brain_path <- "/Users/amanpreetsingh/My Computer/VSCode/repSpat/data/brain_data.h5ad"
+brain_path <- "../inst/extdata/brain_data.h5ad"
 h5ad_path  <- "../inst/extdata/mouse_visium_crop.h5ad"
 
 target_cells <- 5000   # edit: approximate number of cells to keep
@@ -69,7 +69,7 @@ py_set_item(adata$layers, "layer 1", adata$X)
 n_cells <- as.integer(py_to_r(adata$n_obs))
 py_set_item(adata$obs, "sample_id", r_to_py(rep("mouse_brain", n_cells)))
 
-adata$write_h5ad(h5ad_path)
+adata$write_h5ad(h5ad_path, compression = "gzip")
 adata
 ```
 

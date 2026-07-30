@@ -1,1 +1,17 @@
 .venv/
+.git/
+.github/
+docs/
+.Rproj.user/
+.claude/
+inst/doc/
+vignettes/*.html
+vignettes/*.R
+*.tar.gz
+*.Rproj
+.DS_Store
+.Rhistory
+.RData
+
+# inst/extdata is deliberately NOT ignored: the workshop data is copied into the
+# image from there, so the vignettes can read it without a separate download.

@@ -24,4 +24,4 @@ RUN python -m pip install --upgrade pip setuptools
 
 RUN python -m pip install git+https://github.com/amanpreet60/repspat.git
 
-COPY --chown=rstudio:rstudio . /home/rstudio/repSpat_Workshop
+COPY --chown=rstudio:rstudio . /home/rstudio

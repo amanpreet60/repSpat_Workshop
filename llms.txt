@@ -81,13 +81,13 @@ cd /path/to/your/working/directory
 2.  Pull the workshop Docker image.
 
 ``` text
-docker pull ghcr.io/amanpreet60/repspat_workshop:f433744
+docker pull ghcr.io/amanpreet60/repspat_workshop:latest
 ```
 
 3.  Start the Docker container.
 
 ``` terminal
-docker run -e PASSWORD=bioc -p 8787:8787 ghcr.io/amanpreet60/repspat_workshop:f433744
+docker run -e PASSWORD=bioc -p 8787:8787 ghcr.io/amanpreet60/repspat_workshop:latest
 ```
 
 4.  Open your web browser and visit:

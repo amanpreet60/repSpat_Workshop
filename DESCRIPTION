@@ -10,7 +10,7 @@ Encoding: UTF-8
 LazyData: false
 URL: https://amanpreet60.github.io/repSpat_Workshop/
 BugReports: https://github.com/amanpreet60/repSpat_Workshop/issues
-DockerImage: ghcr.io/amanpreet60/repspatworkshop:latest
+DockerImage: ghcr.io/amanpreet60/repspat_workshop:latest
 biocViews: Workshop, Spatial, SingleCell, Transcriptomics
 Imports:
     BiocStyle,

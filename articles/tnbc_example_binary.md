@@ -106,13 +106,13 @@ measures how well the resulting clusters are spatially separated.
 
 ``` r
 
-data <- repspat$spatial_silhouette_analysis(
+adata <- repspat$spatial_silhouette_analysis(
     adata = adata,
     n_neighbors_list = list(as.integer(6), as.integer(8)),
     n_clusters_range = as.integer(4:8)
 )
 cat("\n--------------------\n\n")
-py_get_item(data$uns, "silhouette_scores")
+py_get_item(adata$uns, "silhouette_scores")
 ```
 
 We proceed with `n_neighbors = 8` and `n_clusters = 7` for the

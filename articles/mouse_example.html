@@ -5,12 +5,12 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Mouse Visium Example • repSpatWorkshop</title>
+<title>Mouse CosMx Example • repSpatWorkshop</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Mouse Visium Example">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Mouse CosMx Example">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-notebooks" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Notebooks</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-notebooks">
 <li><a class="dropdown-item" href="../articles/tnbc_example_binary.html">TNBC Example (Binary)</a></li>
-    <li><a class="dropdown-item" href="../articles/mouse_example.html">Mouse Visium Example</a></li>
+    <li><a class="dropdown-item" href="../articles/mouse_example.html">Mouse CosMx Example</a></li>
   </ul>
 </li>
       </ul>
@@ -54,7 +54,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Mouse Visium Example</h1>
+      <h1>Mouse CosMx Example</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/amanpreet60/repSpat_Workshop/blob/main/vignettes/mouse_example.Rmd" class="external-link"><code>vignettes/mouse_example.Rmd</code></a></small>
@@ -66,7 +66,7 @@
 <div class="section level2">
 <h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>This is the mouse Visium version of the workflow. It follows the same
+<p>This is the mouse CosMx version of the workflow. It follows the same
 steps as the main TNBC example, using continuous features and the
 Euclidean metric. The one difference is in preprocessing: because the
 full object is large (~48,556 cells), only a small contiguous crop of
@@ -160,13 +160,13 @@ constrained clusters.</p>
 count are evaluated and scored with the spatial silhouette score, which
 measures how well the resulting clusters are spatially separated.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_silhouette_analysis</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_silhouette_analysis</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
 <span>    n_neighbors_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    n_clusters_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"silhouette_scores"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">adata</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"silhouette_scores"</span><span class="op">)</span></span></code></pre></div>
 <p>For this crop the scores are highest at a small number of clusters,
 so we proceed with <code>n_neighbors = 8</code> and
 <code>n_clusters = 7</code> for the clustering step.</p>
@@ -284,7 +284,7 @@ nothing to relabel.</p>
 <div class="section level2">
 <h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
 </h2>
-<p>Applied to a cropped portion of the mouse Visium sample,
+<p>Applied to a cropped portion of the mouse CosMx sample,
 <code>repSpat</code> found all seven clusters to be statistically
 distinct, so no repeated spatial patterns were recovered here. This is
 itself an informative result: within this small contiguous crop, the

@@ -35,7 +35,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-notebooks" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Notebooks</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-notebooks">
 <li><a class="dropdown-item" href="../articles/tnbc_example_binary.html">TNBC Example (Binary)</a></li>
-    <li><a class="dropdown-item" href="../articles/mouse_example.html">Mouse Visium Example</a></li>
+    <li><a class="dropdown-item" href="../articles/mouse_example.html">Mouse CosMx Example</a></li>
   </ul>
 </li>
       </ul>
@@ -158,13 +158,13 @@ subsequent steps to construct spatially constrained clusters.</p>
 count are evaluated and scored with the spatial silhouette score, which
 measures how well the resulting clusters are spatially separated.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">data</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_silhouette_analysis</span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">adata</span> <span class="op">&lt;-</span> <span class="va">repspat</span><span class="op">$</span><span class="fu">spatial_silhouette_analysis</span><span class="op">(</span></span>
 <span>    adata <span class="op">=</span> <span class="va">adata</span>,</span>
 <span>    n_neighbors_list <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fl">6</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>    n_clusters_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fl">4</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"silhouette_scores"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">adata</span><span class="op">$</span><span class="va">uns</span>, <span class="st">"silhouette_scores"</span><span class="op">)</span></span></code></pre></div>
 <p>We proceed with <code>n_neighbors = 8</code> and
 <code>n_clusters = 7</code> for the clustering step.</p>
 </div>

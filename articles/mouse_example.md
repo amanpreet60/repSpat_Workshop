@@ -1,8 +1,8 @@
-# Mouse Visium Example
+# Mouse CosMx Example
 
 ## Introduction
 
-This is the mouse Visium version of the workflow. It follows the same
+This is the mouse CosMx version of the workflow. It follows the same
 steps as the main TNBC example, using continuous features and the
 Euclidean metric. The one difference is in preprocessing: because the
 full object is large (~48,556 cells), only a small contiguous crop of
@@ -107,13 +107,13 @@ measures how well the resulting clusters are spatially separated.
 
 ``` r
 
-data <- repspat$spatial_silhouette_analysis(
+adata <- repspat$spatial_silhouette_analysis(
     adata = adata,
     n_neighbors_list = list(as.integer(6), as.integer(8)),
     n_clusters_range = as.integer(4:8)
 )
 cat("\n--------------------\n\n")
-py_get_item(data$uns, "silhouette_scores")
+py_get_item(adata$uns, "silhouette_scores")
 ```
 
 For this crop the scores are highest at a small number of clusters, so
@@ -244,7 +244,7 @@ relabel.
 
 ## Conclusion
 
-Applied to a cropped portion of the mouse Visium sample, `repSpat` found
+Applied to a cropped portion of the mouse CosMx sample, `repSpat` found
 all seven clusters to be statistically distinct, so no repeated spatial
 patterns were recovered here. This is itself an informative result:
 within this small contiguous crop, the clusters carry genuinely

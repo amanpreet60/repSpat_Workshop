@@ -42,7 +42,7 @@ By the end of this workshop, participants will be able to:
 The following background is preferred but not required:
 
 - Basic familiarity with R.
-- Familiarity with spatial omics data eg. Visium, MIBI-TOF.
+- Familiarity with spatial omics data eg. MIBI-TOF, CosMx, Visium.
 - Basic experience working with SpatialExperiment object.
 
 ## Docker
@@ -98,7 +98,7 @@ MIBI-TOF spatial proteomics TNBC with binary markers
 vignettes/tnbc_example_binary.Rmd
 ```
 
-10x Visium spatial transcriptomics of mouse brain
+CosMx SMI spatial transcriptomics of mouse brain
 
 ```text
 vignettes/mouse_example.Rmd
@@ -112,6 +112,6 @@ vignettes/mouse_example.Rmd
 
 3. Keren, L., Bosse, M., Marquez, D., et al. (2018). A Structured Tumor-Immune Microenvironment in Triple Negative Breast Cancer (TNBC) Revealed by Multiplexed Ion Beam Imaging. *Cell*, 174(6), 1373-1387. https://www.cell.com/fulltext/S0092-8674(18)31100-0
 
-4. 10x Genomics. Visium spatial gene expression, mouse coronal brain section. Distributed via the Bioconductor `STexampleData` package. https://bioconductor.org/packages/STexampleData
+4. Bruker Spatial Biology. CosMx SMI mouse brain FFPE dataset (950-plex). https://brukerspatialbiology.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/cosmx-smi-mouse-brain-ffpe-dataset/ Also distributed via the Bioconductor `OSTA.data` package as `CosMx1k_MouseBrain2`. https://bioconductor.org/packages/OSTA.data
 
 5. Virshup, I., Rybakov, S., Theis, F. J., Angerer, P., & Wolf, F. A. (2024). anndata: Access and store annotated data matrices. *Journal of Open Source Software*, 9(101), 4371. https://doi.org/10.21105/joss.04371

@@ -1,11 +1,11 @@
 ---
-title: "Mouse Visium Example"
+title: "Mouse CosMx Example"
 output:
   BiocStyle::html_document:
     toc: true
     toc_depth: 2
 vignette: >
-  %\VignetteIndexEntry{Mouse Visium Example: Detecting Repeated Spatial Patterns}
+  %\VignetteIndexEntry{Mouse CosMx Example: Detecting Repeated Spatial Patterns}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
@@ -15,7 +15,7 @@ params:
 
 # Introduction
 
-This is the mouse Visium version of the workflow. It follows the same steps as the main TNBC example, using continuous features and the Euclidean metric. The one difference is in preprocessing: because the full object is large (~48,556 cells), only a small contiguous crop of the tissue (~5,000 cells) is retained for the analysis. For a detailed explanation of each step, see the main TNBC vignette.
+This is the mouse CosMx version of the workflow. It follows the same steps as the main TNBC example, using continuous features and the Euclidean metric. The one difference is in preprocessing: because the full object is large (~48,556 cells), only a small contiguous crop of the tissue (~5,000 cells) is retained for the analysis. For a detailed explanation of each step, see the main TNBC vignette.
 
 # Load libraries
 
@@ -35,7 +35,7 @@ Because the mouse object is a single tissue, rather than selecting one sample th
 
 ```{r crop-settings, echo=exists("params") && isTRUE(params$show_data_prep_code)}
 brain_path <- "../inst/extdata/brain_data.h5ad"
-h5ad_path  <- "../inst/extdata/mouse_visium_crop.h5ad"
+h5ad_path  <- "../inst/extdata/mouse_cosmx_crop.h5ad"
 
 target_cells <- 5000   # edit: approximate number of cells to keep
 ```
@@ -105,13 +105,13 @@ print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 Before clustering, combinations of neighborhood size and cluster count are evaluated and scored with the spatial silhouette score, which measures how well the resulting clusters are spatially separated.
 
 ```{r silhouette-analysis, eval=exists("params") && isTRUE(params$run_analysis)}
-data <- repspat$spatial_silhouette_analysis(
+adata <- repspat$spatial_silhouette_analysis(
     adata = adata,
     n_neighbors_list = list(as.integer(6), as.integer(8)),
     n_clusters_range = as.integer(4:8)
 )
 cat("\n--------------------\n\n")
-py_get_item(data$uns, "silhouette_scores")
+py_get_item(adata$uns, "silhouette_scores")
 ```
 
 For this crop the scores are highest at a small number of clusters, so we proceed with `n_neighbors = 8` and `n_clusters = 7` for the clustering step.
@@ -217,4 +217,4 @@ For this dataset, every cluster pair was found to be significantly different (`a
 
 # Conclusion
 
-Applied to a cropped portion of the mouse Visium sample, `repSpat` found all seven clusters to be statistically distinct, so no repeated spatial patterns were recovered here. This is itself an informative result: within this small contiguous crop, the clusters carry genuinely different feature profiles. As with the TNBC example, results are best interpreted alongside cluster size, location, and biological context rather than the test result in isolation.
+Applied to a cropped portion of the mouse CosMx sample, `repSpat` found all seven clusters to be statistically distinct, so no repeated spatial patterns were recovered here. This is itself an informative result: within this small contiguous crop, the clusters carry genuinely different feature profiles. As with the TNBC example, results are best interpreted alongside cluster size, location, and biological context rather than the test result in isolation.

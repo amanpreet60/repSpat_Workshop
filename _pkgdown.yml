@@ -46,7 +46,7 @@ navbar:
       menu:
       - text: "TNBC Example (Binary)"
         href: articles/tnbc_example_binary.html
-      - text: "Mouse Visium Example"
+      - text: "Mouse CosMx Example"
         href: articles/mouse_example.html
   right:
    - icon: fa-github

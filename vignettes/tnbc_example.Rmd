@@ -142,13 +142,13 @@ The function takes the following inputs:
 
 
 ```{r silhouette-analysis, eval=exists("params") && isTRUE(params$run_analysis)}
-data <- repspat$spatial_silhouette_analysis(
+adata <- repspat$spatial_silhouette_analysis(
     adata = adata,
     n_neighbors_list = list(as.integer(6), as.integer(8)),
     n_clusters_range = as.integer(4:8)
 )
 cat("\n--------------------\n\n")
-py_get_item(data$uns, "silhouette_scores")
+py_get_item(adata$uns, "silhouette_scores")
 ```
 
 The highest spatial silhouette score is obtained for n_neighbors = 8 and n_clusters = 4, indicating the best cluster separation among the parameter combinations evaluated. The combination n_neighbors = 8 and n_clusters = 7 also achieves a comparable score.

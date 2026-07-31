@@ -17,7 +17,6 @@ inst/extdata/*.h5ad
 !inst/extdata/brain_data.h5ad
 .RDataTmp
 .quarto
-.Rbuildignore
 build_site.R
 .claude
 docs/

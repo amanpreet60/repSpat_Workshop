@@ -136,7 +136,7 @@ adata <- repspat$spatial_constrained_hac(
     n_neighs = as.integer(8)
 )
 cat("\n--------------------\n\n")
-py_get_item(data$obs, "labels")
+py_get_item(adata$obs, "labels")
 ```
 
 The crop is partitioned into 7 spatially coherent clusters, each
@@ -166,7 +166,7 @@ each cluster relative to the rest of the tissue.
 
 plt <- reticulate::import("matplotlib.pyplot")
 feature_plots <- repspat$plot_cluster_feature_presence(
-    adata = data,
+    adata = adata,
     label_key = "labels",
     top_n = as.integer(10),
     figsize = reticulate::tuple(8, 3),
@@ -195,7 +195,7 @@ adata <- repspat$create_blocks(
 )
 
 cat("\n--------------------\n\n")
-py_get_item(data$obs, "repspat_block_id")
+py_get_item(adata$obs, "repspat_block_id")
 ```
 
 ## Test Spatial Invariance Between Clusters

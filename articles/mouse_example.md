@@ -101,9 +101,8 @@ print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 
 ## Select Clustering Parameters
 
-Before clustering, combinations of neighborhood size and cluster count
-are evaluated and scored with the spatial silhouette score, which
-measures how well the resulting clusters are spatially separated.
+Before clustering, combinations of neighborhood size and number of
+clusters are evaluated and scored based on the spatial silhouette score.
 
 ``` r
 
@@ -117,7 +116,7 @@ py_get_item(adata$uns, "silhouette_scores")
 ```
 
 For this crop the scores are highest at a small number of clusters, so
-we proceed with `n_neighbors = 8` and `n_clusters = 7` for the
+we proceed with `n_neighbors = 8` and `n_clusters = 7` following
 clustering step.
 
 ## Construct Spatially Constrained Clusters
@@ -139,9 +138,6 @@ cat("\n--------------------\n\n")
 py_get_item(adata$obs, "labels")
 ```
 
-The crop is partitioned into 7 spatially coherent clusters, each
-occupying a connected part of the tissue.
-
 ## Visualize the Spatially Constrained Clusters
 
 ``` r
@@ -159,8 +155,8 @@ plt$show()
 
 ## Visualize Features Across Clusters
 
-For continuous features, this displays the features most enriched in
-each cluster relative to the rest of the tissue.
+For continuous features, it displays those with the largest standardized
+mean difference between the cluster and all remaining cells.
 
 ``` r
 
@@ -184,8 +180,7 @@ for (fig_axes in reticulate::iterate(feature_plots$values())) {
 ## Create blocks for permutation
 
 To account for local spatial dependence, cells within each cluster are
-grouped into smaller blocks so that permutation is performed at the
-block level rather than the individual-cell level.
+grouped into smaller blocks.
 
 ``` r
 
@@ -203,7 +198,7 @@ py_get_item(adata$obs, "repspat_block_id")
 Every pair of clusters is compared using the MMD² statistic to test
 whether their feature distributions differ. The test uses the `"IMQ"`
 kernel, 200 block permutations to approximate the null distribution, and
-the Benjamini–Hochberg correction for multiple comparisons.
+the Benjamini–Hochberg procedure for multiple comparisons.
 
 ``` r
 
@@ -218,14 +213,10 @@ cat("\n--------------------\n\n")
 py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = list("null_dist")))
 ```
 
-Cluster pairs with a small `obs_mmd_sq` and a large `adj_p` have similar
-feature profiles, whereas those with a large MMD² and a small `adj_p`
-are clearly distinct.
-
 ## Visualize Repeated Spatial Patterns
 
 Cluster pairs that are not significantly different (`adj_p >= 0.05`) are
-treated as repeated spatial patterns and drawn as a network.
+treated as repeated spatial patterns.
 
 ``` r
 
@@ -238,16 +229,21 @@ similarity_matrix
 ```
 
 For this dataset, every cluster pair was found to be significantly
-different (`adj_p < 0.05`), so the network contains no connections. No
-repeated spatial patterns were detected, and there is nothing to
-relabel.
+different (`adj_p < 0.05`). No repeated spatial patterns were detected.
+Thus, we do not relabel the clusters.
 
 ## Conclusion
 
-Applied to a cropped portion of the mouse CosMx sample, `repSpat` found
-all seven clusters to be statistically distinct, so no repeated spatial
-patterns were recovered here. This is itself an informative result:
-within this small contiguous crop, the clusters carry genuinely
-different feature profiles. As with the TNBC example, results are best
-interpreted alongside cluster size, location, and biological context
-rather than the test result in isolation.
+The application of repSpat to a cropped region of the mouse CosMx sample
+showed statistically significant differences in feature distributions
+among all seven spatially constrained clusters. Thus, no repeated
+spatial patterns were identified within this region. The absence of
+repeated spatial patterns is also informative, indicating that none of
+the identified clusters could be relabelled together based on the
+repSpat pairwise tests.
+
+For the whole tissue, the tissue can be divided into contiguous regions,
+and CAHC can be applied to these regions in parallel. The resulting
+clusters can then be collected, and the repSpat pairwise tests can be
+performed across all clusters to identify repeated spatial patterns in
+the entire tissue.

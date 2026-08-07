@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the binary version of the TNBC workflow. It follows the same
+This is the binary version of the TNBC workflow. It follows the similar
 steps as the main example, except that each marker measurement is
 thresholded into a present (`1`) or absent (`0`) value and cells are
 compared using the Jaccard metric, which is suited to binary
@@ -27,7 +27,10 @@ repspat <- import("repspat", convert = FALSE)
 ## Prepare the Sample
 
 In this step, the `.rds` file is converted into an AnnData object and
-each marker is thresholded into a present/absent value. The thresholded
+each marker is thresholded into a present/absent value. The
+marker-specific thresholds are those used in our published analysis of
+the MIBI-TOF TNBC dataset ([Senanayake & Jeganathan,
+2026](https://doi.org/10.1016/j.spasta.2026.101025)). The thresholded
 values are stored in a `"binary"` layer alongside the original
 measurements in `X`. A marker is considered present when its value is
 greater than or equal to its threshold.
@@ -69,9 +72,8 @@ adata
 
 The first step of the workflow selects `Sample_04` and computes pairwise
 feature distances between its cells from the `"binary"` layer, using the
-`"jaccard"` metric suited to binary present/absent data. These distances
-are used in the subsequent steps to construct spatially constrained
-clusters.
+`"jaccard"` metric. These distances are used in the subsequent steps to
+construct spatially constrained clusters.
 
 ``` r
 
@@ -100,9 +102,8 @@ print(py_to_r(py_get_item(adata$obsp, "repspat_distances"))[1:5, 1:5])
 
 ## Select Clustering Parameters
 
-Before clustering, combinations of neighborhood size and cluster count
-are evaluated and scored with the spatial silhouette score, which
-measures how well the resulting clusters are spatially separated.
+Before clustering, combinations of neighborhood size and number of
+clusters are evaluated and based on the spatial silhouette score.
 
 ``` r
 
@@ -116,15 +117,15 @@ py_get_item(adata$uns, "silhouette_scores")
 ```
 
 We proceed with `n_neighbors = 8` and `n_clusters = 7` for the
-clustering step.
+subsequent clustering analysis.
 
 ## Construct Spatially Constrained Clusters
 
 Using the selected parameters, the tissue is partitioned into spatially
-constrained clusters with constrained agglomerative hierarchical
+constrained clusters using the constrained agglomerative hierarchical
 clustering (CAHC), which groups cells by feature similarity while
 enforcing spatial connectivity. The resulting cluster labels are stored
-in `adata.obs["labels"]`.
+in updated annData, `adata.obs["labels"]`.
 
 ``` r
 
@@ -198,7 +199,7 @@ py_get_item(adata$obs, "repspat_block_id")
 Every pair of clusters is compared using the MMD² statistic to test
 whether their feature distributions differ. The test uses the `"IMQ"`
 kernel, 200 block permutations to approximate the null distribution, and
-the Benjamini–Hochberg correction for multiple comparisons.
+the Benjamini–Hochberg procedure for multiple comparisons.
 
 ``` r
 
@@ -216,7 +217,7 @@ py_to_r(py_get_item(adata$uns, "repspat_mmd_results")$head(5L)$drop(columns = li
 ## Visualize Repeated Spatial Patterns
 
 Cluster pairs that are not significantly different (`adj_p >= 0.05`) are
-treated as repeated spatial patterns and drawn as a network.
+treated as repeated spatial patterns.
 
 ``` r
 
@@ -230,9 +231,7 @@ similarity_matrix
 
 ## Relabel Repeated Spatial Patterns
 
-Based on the test results, the clusters that could not be statistically
-distinguished are assigned a single shared label. This step changes only
-the cluster labels.
+This step changes only the cluster labels.
 
 ``` r
 
@@ -260,15 +259,14 @@ plt$show()
 
 ## Running Multiple Samples
 
-Here we worked with just one sample, `Sample_04`, because every sample
-is its own piece of tissue with its own layout. If you have more
-samples, you can run the same steps on each one, one at a time, and then
-compare the repeated spatial patterns you find across them.
+Here we worked with just one sample, `Sample_04`. For multiple samples,
+the same workflow can be applied in parallel to each sample, and the
+repeated spatial patterns identified within each sample can then be
+visualized separately.
 
 ## Conclusion
 
-Applied to the TNBC sample using binary marker profiles and the Jaccard
-metric, `repSpat` recovered repeated patterns among the clusters. As
-with the continuous version, repeated patterns are best interpreted
-alongside cluster size, location, and biological context rather than the
-test result in isolation.
+In this example, repSpat was applied to binary protein-marker profiles
+from the TNBC sample using the Jaccard metric. The analysis identified
+repeated spatial patterns among spatially separated clusters with
+similar binary protein-marker distributions.

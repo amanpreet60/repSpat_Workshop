@@ -1,5 +1,8 @@
 # repSpat
 
+Landing page:
+<https://amanpreet60.github.io/repSpat_Workshop/index.html>.
+
 This workshop demonstrates how to use the Python implementation of
 repSpat within R through the reticulate package. RepSpat detects
 repeated spatial patterns in spatial omics data, defined as spatially

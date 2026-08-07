@@ -135,8 +135,8 @@ adata$obs$sample_id$unique()
 ```
 
 After computing the distances, the resulting distance matrix is stored
-in adata\$uns\[“repspat_distances”\] for use in the clustering step. The
-feature matrix (layers\[“layer 1”\]), spatial coordinates
+in adata\$obsp\[“repspat_distances”\] for use in the clustering step.
+The feature matrix (layers\[“layer 1”\]), spatial coordinates
 (obsm\[“spatial”\]), and cell information (obs) remain unchanged.
 
 We can verify that the data have been loaded correctly and inspect the
@@ -232,7 +232,7 @@ adata <- repspat$spatial_constrained_hac(
     n_neighs = as.integer(8)
 )
 cat("\n--------------------\n\n")
-py_get_item(adata$obs, "labels")
+py_get_item(data$obs, "labels")
 ```
 
 The function returns an updated AnnData object with the cluster
@@ -275,8 +275,8 @@ partitioned, but they do not explain what distinguishes each cluster.
 This function visualizes the features that are most characteristic of
 each cluster. For binary features, it displays the features with the
 highest prevalence within each cluster. For continuous features, it
-displays the features that are most enriched relative to the remaining
-tissue.
+displays those with the largest standardized mean difference between the
+cluster and all remaining cells.
 
 The function takes the following inputs:
 
@@ -381,9 +381,7 @@ The function takes the following inputs:
   whereas the Gaussian kernel decreases more rapidly. In this example,
   we use “IMQ”.
 - `nperm`: the number of block permutations used to approximate the null
-  distribution of the MMD² statistic. Increasing the number of
-  permutations generally produces more stable p-value estimates but
-  requires additional computation.
+  distribution of the MMD² statistic.
 - `adj_p = "BH"`: the method used to adjust p-values for the multiple
   pairwise tests. The Benjamini–Hochberg (“BH”) procedure is used here
   to control the false discovery rate.
@@ -410,6 +408,10 @@ include:
 - `adj_p`: the p-value adjusted for multiple comparisons using the
   selected procedure.
 
+In the future versions, false discovery rate threshold (`alpha`) for
+`multiple_comparison`and kernel parameter (`lambda`) can be changed by
+users.
+
 ## Visualize Repeated Spatial Patterns
 
 The pairwise hypothesis tests identify cluster pairs that do not show
@@ -429,9 +431,6 @@ The function takes the following inputs:
   results.
 - `plot = TRUE`: whether to display the network in addition to returning
   the similarity matrix.
-- `alpha`: the false discovery rate (FDR) threshold used to determine
-  which cluster pairs are considered similar. Cluster pairs with adj_p ≥
-  alpha are treated as repeated spatial patterns.
 
 ``` r
 

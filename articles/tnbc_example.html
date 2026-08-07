@@ -200,8 +200,8 @@ compare cells.</li>
 <span><span class="op">)</span></span>
 <span><span class="va">adata</span><span class="op">$</span><span class="va">obs</span><span class="op">$</span><span class="va">sample_id</span><span class="op">$</span><span class="fu">unique</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>After computing the distances, the resulting distance matrix is
-stored in adata$uns[“repspat_distances”] for use in the clustering step.
-The feature matrix (layers[“layer 1”]), spatial coordinates
+stored in adata$obsp[“repspat_distances”] for use in the clustering
+step. The feature matrix (layers[“layer 1”]), spatial coordinates
 (obsm[“spatial”]), and cell information (obs) remain unchanged.</p>
 <p>We can verify that the data have been loaded correctly and inspect
 the main components of the AnnData object before proceeding.</p>
@@ -294,7 +294,7 @@ define the spatial connectivity graph.</li>
 <span>    n_neighs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/integer.html" class="external-link">as.integer</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\n--------------------\n\n"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">adata</span><span class="op">$</span><span class="va">obs</span>, <span class="st">"labels"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rstudio.github.io/reticulate/reference/py_get_item.html" class="external-link">py_get_item</a></span><span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">obs</span>, <span class="st">"labels"</span><span class="op">)</span></span></code></pre></div>
 <p>The function returns an updated AnnData object with the cluster
 assignment for each cell stored in adata.obs[“labels”]. These spatially
 constrained clusters are used in the subsequent steps for block
@@ -333,8 +333,8 @@ partitioned, but they do not explain what distinguishes each cluster.
 This function visualizes the features that are most characteristic of
 each cluster. For binary features, it displays the features with the
 highest prevalence within each cluster. For continuous features, it
-displays the features that are most enriched relative to the remaining
-tissue.</p>
+displays those with the largest standardized mean difference between the
+cluster and all remaining cells.</p>
 <p>The function takes the following inputs:</p>
 <ul>
 <li>
@@ -450,9 +450,7 @@ distance increases, whereas the Gaussian kernel decreases more rapidly.
 In this example, we use “IMQ”.</li>
 <li>
 <code>nperm</code>: the number of block permutations used to
-approximate the null distribution of the MMD² statistic. Increasing the
-number of permutations generally produces more stable p-value estimates
-but requires additional computation.</li>
+approximate the null distribution of the MMD² statistic.</li>
 <li>
 <code>adj_p = "BH"</code>: the method used to adjust p-values for
 the multiple pairwise tests. The Benjamini–Hochberg (“BH”) procedure is
@@ -482,6 +480,9 @@ clusters being compared.</li>
 <code>adj_p</code>: the p-value adjusted for multiple comparisons
 using the selected procedure.</li>
 </ul>
+<p>In the future versions, false discovery rate threshold
+(<code>alpha</code>) for <code>multiple_comparison</code>and kernel
+parameter (<code>lambda</code>) can be changed by users.</p>
 </div>
 <div class="section level2">
 <h2 id="visualize-repeated-spatial-patterns">Visualize Repeated Spatial Patterns<a class="anchor" aria-label="anchor" href="#visualize-repeated-spatial-patterns"></a>
@@ -503,10 +504,6 @@ comparison results.</li>
 <li>
 <code>plot = TRUE</code>: whether to display the network in addition
 to returning the similarity matrix.</li>
-<li>
-<code>alpha</code>: the false discovery rate (FDR) threshold used to
-determine which cluster pairs are considered similar. Cluster pairs with
-adj_p ≥ alpha are treated as repeated spatial patterns.</li>
 </ul>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">similarity_matrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rstudio.github.io/reticulate/reference/r-py-conversion.html" class="external-link">py_to_r</a></span><span class="op">(</span><span class="va">repspat</span><span class="op">$</span><span class="fu">pairwise_results_to_matrix</span><span class="op">(</span></span>

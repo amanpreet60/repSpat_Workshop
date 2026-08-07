@@ -1,5 +1,7 @@
 # repSpat
 
+Landing page: https://amanpreet60.github.io/repSpat_Workshop/index.html.
+
 This workshop demonstrates how to use the Python implementation of repSpat within R through the reticulate package. RepSpat detects repeated spatial patterns in spatial omics data, defined as spatially separated tissue regions with similar distributions of features, such as gene expression, cell types, binary markers, and other molecular or cellular measurements.
 The repSpat provides a nonparametric statistical inference framework based on spatially constrained clustering followed by multiple hypothesis testing between clusters using the maximum mean discrepancy squared (MMD²) statistic and a block-permutation procedure. This enables formal hypothesis testing for repeated spatial patterns. 
 The Python implementation of repSpat accepts input data in the [AnnData](https://anndata.readthedocs.io/en/latest/index.html) (.h5ad) format, a widely used data structure for single-cell and spatial omics analyses. For Bioconductor users, SpatialExperiment objects can be readily converted to AnnData format within R before analysis.

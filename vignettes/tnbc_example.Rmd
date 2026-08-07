@@ -109,7 +109,7 @@ adata <- repspat$compute_distances(
 adata$obs$sample_id$unique()
 ```
 
-After computing the distances, the resulting distance matrix is stored in adata$uns["repspat_distances"] for use in the clustering step. The feature matrix (layers["layer 1"]), spatial coordinates (obsm["spatial"]), and cell information (obs) remain unchanged.
+After computing the distances, the resulting distance matrix is stored in adata$obsp["repspat_distances"] for use in the clustering step. The feature matrix (layers["layer 1"]), spatial coordinates (obsm["spatial"]), and cell information (obs) remain unchanged.
 
 We can verify that the data have been loaded correctly and inspect the main components of the AnnData object before proceeding.
 
@@ -172,7 +172,7 @@ adata <- repspat$spatial_constrained_hac(
     n_neighs = as.integer(8)
 )
 cat("\n--------------------\n\n")
-py_get_item(adata$obs, "labels")
+py_get_item(data$obs, "labels")
 ```
 
 The function returns an updated AnnData object with the cluster assignment for each cell stored in adata.obs["labels"]. These spatially constrained clusters are used in the subsequent steps for block construction and hypothesis testing.
@@ -199,7 +199,7 @@ The resulting plot shows the spatial distribution of the seven clusters across t
 
 # Visualize Features Across Clusters
 
-The spatially constrained clusters show how the tissue has been partitioned, but they do not explain what distinguishes each cluster. This function visualizes the features that are most characteristic of each cluster. For binary features, it displays the features with the highest prevalence within each cluster. For continuous features, it displays the features that are most enriched relative to the remaining tissue.
+The spatially constrained clusters show how the tissue has been partitioned, but they do not explain what distinguishes each cluster. This function visualizes the features that are most characteristic of each cluster. For binary features, it displays the features with the highest prevalence within each cluster. For continuous features, it displays those with the largest standardized mean difference between the cluster and all remaining cells.
 
 The function takes the following inputs:
 
@@ -269,7 +269,7 @@ The function takes the following inputs:
 
 - `adata`: the AnnData object containing the feature data, cluster assignments, and permutation-block assignments.
 - `kernel`: the kernel used to compare feature distributions. repSpat supports "IMQ" and "Gaussian" kernels. Both assign greater similarity to cells with similar feature profiles. The inverse multiquadric ("IMQ") kernel decreases more gradually as feature distance increases, whereas the Gaussian kernel decreases more rapidly. In this example, we use "IMQ".
-- `nperm`: the number of block permutations used to approximate the null distribution of the MMD² statistic. Increasing the number of permutations generally produces more stable p-value estimates but requires additional computation.
+- `nperm`: the number of block permutations used to approximate the null distribution of the MMD² statistic.
 - `adj_p = "BH"`: the method used to adjust p-values for the multiple pairwise tests. The Benjamini–Hochberg ("BH") procedure is used here to control the false discovery rate.
 
 ```{r mmd-results, eval=exists("params") && isTRUE(params$run_analysis)}
@@ -291,6 +291,8 @@ The results are stored in adata$uns["repspat_mmd_results"] and include:
 - `p_value`: the unadjusted p-value.
 - `adj_p`: the p-value adjusted for multiple comparisons using the selected procedure.
 
+In the future versions,  false discovery rate threshold (`alpha`) for `multiple_comparison`and kernel parameter (`lambda`) can be changed by users.
+
 # Visualize Repeated Spatial Patterns
 
 The pairwise hypothesis tests identify cluster pairs that do not show evidence of different feature distributions. Using the Benjamini–Hochberg procedure with a false discovery rate (FDR) threshold of 0.05, cluster pairs with adj_p ≥ 0.05 are treated as candidate repeated spatial patterns.
@@ -301,7 +303,6 @@ The function takes the following inputs:
 
 - `adata`: the AnnData object containing the pairwise comparison results.
 - `plot = TRUE`: whether to display the network in addition to returning the similarity matrix.
-- `alpha`: the false discovery rate (FDR) threshold used to determine which cluster pairs are considered similar. Cluster pairs with adj_p ≥ alpha are treated as repeated spatial patterns.
 
 ```{r plot-similarity-network, eval=exists("params") && isTRUE(params$run_analysis), warning=FALSE, out.width="100%"}
 similarity_matrix <- py_to_r(repspat$pairwise_results_to_matrix(

@@ -232,7 +232,7 @@ adata <- repspat$spatial_constrained_hac(
     n_neighs = as.integer(8)
 )
 cat("\n--------------------\n\n")
-py_get_item(data$obs, "labels")
+py_get_item(adata$obs, "labels")
 ```
 
 The function returns an updated AnnData object with the cluster
